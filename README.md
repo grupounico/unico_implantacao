@@ -2,6 +2,7 @@
 
 Painel para conduzir a implantação de instâncias do **Atender Bem**. O sistema cria a solicitação, disponibiliza um onboarding público ao cliente, permite a revisão pelo implantador e executa as configurações da instância em segundo plano.
 
+
 ## O que o sistema faz
 
 - Cria solicitações de implantação a partir de um plano do Atender Bem.
