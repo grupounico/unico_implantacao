@@ -28,7 +28,6 @@ export function createEmptyIdentification(channel: Channel, identifier: string =
     channelIdentifier: identifier,
     storeUnit: "",
     sector: "",
-    agentCount: "",
   };
 }
 

@@ -28,26 +28,6 @@ function countUsersByRole(users: { role: UserRole }[]): Record<UserRole, number>
   return counts;
 }
 
-/**
- * Quantos atendentes (só esse cargo — "nº de atendentes" da fila não conta
- * supervisor/admin) já estão atribuídos a cada fila, pra limitar a lista de
- * "Filas de acesso" no UserFormDialog. `excludeUserId` evita que o próprio
- * usuário em edição conte contra o limite da fila em que ele já está.
- */
-function countAtendentesByQueue(
-  users: UserDraft[],
-  excludeUserId?: string,
-): Record<string, number> {
-  const counts: Record<string, number> = {};
-  for (const user of users) {
-    if (user.role !== "atendente" || user.id === excludeUserId) continue;
-    for (const queueId of user.queueIds) {
-      counts[queueId] = (counts[queueId] ?? 0) + 1;
-    }
-  }
-  return counts;
-}
-
 export function TeamStep({
   data,
   queues,
@@ -79,7 +59,6 @@ export function TeamStep({
     : (availableRoles[0] ?? "atendente");
   const hasRoom = (role: UserRole) => !userQuotas || counts[role] < userQuotas[role];
   const canAddAnyUser = availableRoles.some(hasRoom);
-  const queueAgentCounts = countAtendentesByQueue(data.users, editingUser?.id);
 
   function openCreateDialog() {
     if (!hasRoom(selectedDraftRole)) return;
@@ -274,7 +253,6 @@ export function TeamStep({
           queues={queues}
           userQuotas={userQuotas}
           roleCounts={counts}
-          queueAgentCounts={queueAgentCounts}
           onSave={handleSaveUser}
         />
       </div>
