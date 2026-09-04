@@ -110,7 +110,6 @@ export function OnboardingReview({ data, implantationId }: { data: Partial<Onboa
                 />
                 <Field label="Unidade/loja" value={queue.storeUnit} />
                 <Field label="Setor" value={queue.sector} />
-                <Field label="Atendentes na fila" value={queue.agentCount} />
                 <Field
                   label="Transferir para outra fila"
                   value={TRANSFER_POLICY_LABELS[queue.transferPolicy]}

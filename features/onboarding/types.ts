@@ -37,7 +37,6 @@ export interface QueueDraft {
   channelIdentifier: string;
   storeUnit: string;
   sector: SectorOfActivity;
-  agentCount: string;
   // Regras da fila
   maxConcurrentChatsPerAgent: string;
   distributionStrategy: DistributionStrategy;

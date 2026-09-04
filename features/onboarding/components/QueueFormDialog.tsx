@@ -182,7 +182,7 @@ export function QueueFormDialog({
                 </Select>
               </Field>
               <p className="mt-2 text-xs text-brand/40">
-                Só a identificação (nome, loja, setor e nº de atendentes) precisa ser preenchida de novo — o
+                Só a identificação (nome, loja e setor) precisa ser preenchida de novo — o
                 resto das regras vem copiado.
               </p>
             </DialogBody>
@@ -252,15 +252,6 @@ export function QueueFormDialog({
                         <SelectItem value={SECTOR_OTHER_VALUE}>Outro</SelectItem>
                       </SelectContent>
                     </Select>
-                  </Field>
-                  <Field label="Nº de atendentes nesta fila">
-                    <Input
-                      type="number"
-                      min={0}
-                      value={draft.agentCount}
-                      onChange={(e) => update({ agentCount: e.target.value })}
-                      placeholder="Ex: 3"
-                    />
                   </Field>
                   {sectorMode === "custom" ? (
                     <div className="sm:col-span-2">

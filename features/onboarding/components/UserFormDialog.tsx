@@ -4,13 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/onboarding-ui/Button";
 import { Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader } from "@/components/onboarding-ui/Dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/onboarding-ui/Select";
-import {
-  ROLE_LABELS,
-  type QueueDraft,
-  type UserDraft,
-  type UserQuotas,
-  type UserRole,
-} from "../types";
+import { ROLE_LABELS, type QueueDraft, type UserDraft, type UserQuotas, type UserRole } from "../types";
 import { createId } from "../initial-data";
 import { Field, Input } from "./FormField";
 import { Reveal } from "./Reveal";
@@ -33,7 +27,6 @@ export function UserFormDialog({
   queues,
   userQuotas,
   roleCounts,
-  queueAgentCounts,
   onSave,
 }: {
   open: boolean;
@@ -46,8 +39,6 @@ export function UserFormDialog({
   queues: QueueDraft[];
   userQuotas: UserQuotas;
   roleCounts: Record<UserRole, number>;
-  /** Quantos atendentes já estão em cada fila (id → contagem) — pra travar a fila quando bater o "nº de atendentes" definido nela. */
-  queueAgentCounts: Record<string, number>;
   onSave: (user: UserDraft) => void;
 }) {
   const [draft, setDraft] = useState<UserDraft | null>(null);
@@ -91,14 +82,6 @@ export function UserFormDialog({
   }
 
   const hasRoom = (role: UserRole) => !userQuotas || roleCounts[role] < userQuotas[role];
-
-  /** "" (nunca preenchido) ou valor inválido = sem limite pra essa fila. */
-  function queueIsFull(queue: QueueDraft) {
-    if (draft?.role !== "atendente") return false;
-    const limit = Number(queue.agentCount);
-    if (queue.agentCount.trim() === "" || Number.isNaN(limit)) return false;
-    return (queueAgentCounts[queue.id] ?? 0) >= limit;
-  }
 
   function canSave(user: UserDraft) {
     return Boolean(user.name.trim());
@@ -181,25 +164,18 @@ export function UserFormDialog({
                     <div className="flex flex-wrap gap-1.5">
                       {queues.map((queue) => {
                         const active = draft.queueIds.includes(queue.id);
-                        // Já atribuído continua podendo ser desmarcado mesmo
-                        // se a fila estiver cheia — só bloqueia adicionar novo.
-                        const disabled = !active && queueIsFull(queue);
                         return (
                           <button
                             key={queue.id}
                             type="button"
-                            disabled={disabled}
                             onClick={() => toggleQueue(queue.id)}
                             className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
                               active
                                 ? "border-brand bg-brand-light text-brand"
-                                : disabled
-                                  ? "cursor-not-allowed border-border-soft text-brand/30"
-                                  : "border-border-soft text-brand/50 hover:border-brand/40"
+                                : "border-border-soft text-brand/50 hover:border-brand/40"
                             }`}
                           >
                             {queue.name || "Fila sem nome"}
-                            {disabled ? " (cheia)" : ""}
                           </button>
                         );
                       })}
