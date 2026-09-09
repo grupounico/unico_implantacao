@@ -284,6 +284,27 @@ async function main() {
   check("CREATE_USERS não recria usuário existente", usersMeta[0].created === false);
   check("CREATE_USERS cria o usuário novo", usersMeta[1].created === true);
   check("CREATE_USERS não duplicou no banco mock", usersDb.length === 2);
+  try {
+    await createUsersProcessor({
+      implantationId: "impl-1",
+      deploymentRunId: "run-duplicate-usernames",
+      client,
+      snapshotPayload: {
+        team: {
+          users: [
+            { name: "Login Um", username: "mesmo.login", role: "atendente" },
+            { name: "Login Dois", username: "mesmo.login", role: "supervisor" },
+          ],
+        },
+      },
+    });
+    check("CREATE_USERS rejeita logins duplicados", false);
+  } catch (err) {
+    check(
+      "CREATE_USERS rejeita logins duplicados",
+      err instanceof Error && err.message.includes("login") && err.message.includes("duplicado"),
+    );
+  }
   check(
     "senha não aparece no resultado retornado",
     JSON.stringify(usersResult).includes("password") === false,

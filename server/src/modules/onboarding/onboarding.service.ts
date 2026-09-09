@@ -1,7 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "../../lib/prisma";
 import { ConflictError, NotFoundError } from "../../lib/errors";
-import type { SaveOnboardingInput } from "./onboarding.schema";
+import { duplicateUsernames, invalidUsernames, type SaveOnboardingInput } from "./onboarding.schema";
 
 const EDITABLE_STATUSES = ["ONBOARDING_PENDING", "ONBOARDING_IN_PROGRESS"];
 export const ONBOARDING_TOKEN_TTL_DAYS = 14;
@@ -55,6 +55,17 @@ function assertEditable(status: string) {
   }
 }
 
+function assertUniqueUsernames(responses: unknown) {
+  const invalid = invalidUsernames(responses);
+  if (invalid.length > 0) {
+    throw new ConflictError(`O login \"${invalid[0]}\" deve estar em letras minúsculas e não pode ter espaços.`);
+  }
+  const duplicates = duplicateUsernames(responses);
+  if (duplicates.length > 0) {
+    throw new ConflictError(`O login \"${duplicates[0]}\" foi informado mais de uma vez. Cada usuário deve ter um login único.`);
+  }
+}
+
 async function getByToken(token: string) {
   const implantation = await findImplantationByToken(token);
 
@@ -83,6 +94,7 @@ async function getByToken(token: string) {
 async function saveProgress(token: string, data: SaveOnboardingInput) {
   const implantation = await findImplantationByToken(token);
   assertEditable(implantation.status);
+  assertUniqueUsernames(data.responses);
 
   const now = new Date();
 
@@ -115,6 +127,7 @@ async function saveProgress(token: string, data: SaveOnboardingInput) {
 async function submit(token: string) {
   const implantation = await findImplantationByToken(token);
   assertEditable(implantation.status);
+  assertUniqueUsernames(implantation.onboarding?.responses ?? {});
 
   const now = new Date();
 

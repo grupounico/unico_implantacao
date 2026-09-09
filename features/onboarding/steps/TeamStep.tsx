@@ -250,6 +250,7 @@ export function TeamStep({
           editingUser={editingUser}
           initialName={draftName.trim()}
           initialRole={selectedDraftRole}
+          users={data.users}
           queues={queues}
           userQuotas={userQuotas}
           roleCounts={counts}

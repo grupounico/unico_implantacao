@@ -21,6 +21,7 @@ import { TagsStep } from "./steps/TagsStep";
 import { TeamStep } from "./steps/TeamStep";
 import { WelcomeStep } from "./steps/WelcomeStep";
 import { STEP_ORDER, type OnboardingData, type StepId, type UserQuotas } from "./types";
+import { hasDuplicateUsernames } from "./usernames";
 
 // Sem `token` (rota de demonstração), a implantação simula os limites de
 // usuário que viriam do plano escolhido na criação do link — ver server:
@@ -176,7 +177,10 @@ export function OnboardingWizard({
   const isCompanyDetailsValid =
     data.company.legalName.trim() !== "" && data.company.contactEmail.trim() !== "";
   const isServiceValid = data.service.queues.length > 0;
-  const isTeamValid = data.team.users.length > 0;
+  const isTeamValid =
+    data.team.users.length > 0 &&
+    data.team.users.every((user) => user.name.trim() && user.username.trim()) &&
+    !hasDuplicateUsernames(data.team.users);
 
   const NEXT_DISABLED: Partial<Record<StepId, boolean>> = {
     companyContact: !isCompanyContactValid,
