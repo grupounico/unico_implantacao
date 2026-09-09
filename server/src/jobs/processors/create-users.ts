@@ -89,6 +89,18 @@ export const createUsersProcessor: Processor = async ({ client, snapshotPayload 
     return { metadata: { users: [] } };
   }
 
+  const usernames = new Set<string>();
+  for (const user of team.users) {
+    const normalizedUsername = user.username.replace(/\s/g, "").toLowerCase();
+    if (user.username !== normalizedUsername) {
+      throw new Error(`O login \"${user.username}\" deve estar em letras minúsculas e não pode ter espaços.`);
+    }
+    if (usernames.has(normalizedUsername)) {
+      throw new Error(`O login \"${user.username}\" está duplicado no onboarding. Cada usuário deve ter um login único.`);
+    }
+    usernames.add(normalizedUsername);
+  }
+
   const usesGeneratedPassword = !(team.usesCustomDefaultPassword && team.defaultPassword);
   const password = usesGeneratedPassword ? generateDefaultPassword() : team.defaultPassword;
 

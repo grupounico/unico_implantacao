@@ -6,3 +6,37 @@ export const saveOnboardingSchema = z.object({
 });
 
 export type SaveOnboardingInput = z.infer<typeof saveOnboardingSchema>;
+
+/** Retorna logins repetidos, ignorando maiúsculas/minúsculas e espaços nas pontas. */
+function onboardingUsernames(responses: unknown): string[] {
+  const parsed = z
+    .object({
+      team: z.object({ users: z.array(z.object({ username: z.string() })).default([]) }).optional(),
+    })
+    .passthrough()
+    .safeParse(responses);
+
+  if (!parsed.success) return [];
+
+  return (parsed.data.team?.users ?? []).map((user) => user.username);
+}
+
+/** Um login do Atender Bem deve estar em minúsculas e não pode conter espaços. */
+export function invalidUsernames(responses: unknown): string[] {
+  return onboardingUsernames(responses).filter(
+    (username) => username !== username.replace(/\s/g, "").toLowerCase(),
+  );
+}
+
+/** Retorna logins repetidos, ignorando maiúsculas/minúsculas e espaços. */
+export function duplicateUsernames(responses: unknown): string[] {
+  const seen = new Set<string>();
+  const duplicates = new Set<string>();
+  for (const username of onboardingUsernames(responses)) {
+    const normalized = username.replace(/\s/g, "").toLowerCase();
+    if (!normalized) continue;
+    if (seen.has(normalized)) duplicates.add(normalized);
+    seen.add(normalized);
+  }
+  return [...duplicates];
+}

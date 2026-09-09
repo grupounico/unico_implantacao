@@ -9,6 +9,7 @@ import { createId } from "../initial-data";
 import { Field, Input } from "./FormField";
 import { Reveal } from "./Reveal";
 import { RoleIcon } from "./RoleIcon";
+import { hasDuplicateUsername, normalizeUsername } from "../usernames";
 
 const ROLE_ORDER: UserRole[] = ["atendente", "supervisor", "administrador"];
 
@@ -24,6 +25,7 @@ export function UserFormDialog({
   editingUser,
   initialName,
   initialRole,
+  users,
   queues,
   userQuotas,
   roleCounts,
@@ -36,6 +38,8 @@ export function UserFormDialog({
   initialName: string;
   /** Cargo já selecionado na barra rápida — só usado para pré-preencher a criação. */
   initialRole: UserRole;
+  /** Usuários já cadastrados nesta implantação, para validar o login único. */
+  users: UserDraft[];
   queues: QueueDraft[];
   userQuotas: UserQuotas;
   roleCounts: Record<UserRole, number>;
@@ -84,7 +88,7 @@ export function UserFormDialog({
   const hasRoom = (role: UserRole) => !userQuotas || roleCounts[role] < userQuotas[role];
 
   function canSave(user: UserDraft) {
-    return Boolean(user.name.trim());
+    return Boolean(user.name.trim() && user.username.trim()) && !hasDuplicateUsername(users, user);
   }
 
   // Não exibir perfil que o plano não disponibiliza ao cliente. O perfil
@@ -92,6 +96,7 @@ export function UserFormDialog({
   const availableRoles = ROLE_ORDER.filter(
     (role) => !userQuotas || userQuotas[role] > 0 || role === draft?.role,
   );
+  const usernameAlreadyInUse = draft ? hasDuplicateUsername(users, draft) : false;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -109,11 +114,18 @@ export function UserFormDialog({
                   />
                 </Field>
                 <Field label="Usuário" hint="Login usado para acessar o Atender Bem.">
-                  <Input
-                    value={draft.username}
-                    onChange={(e) => update({ username: e.target.value.replace(/\s/g, "") })}
-                    placeholder="usuario.login"
-                  />
+                  <div className="flex flex-col gap-1.5">
+                    <Input
+                      value={draft.username}
+                      onChange={(e) => update({ username: normalizeUsername(e.target.value) })}
+                      placeholder="usuario.login"
+                      aria-invalid={usernameAlreadyInUse}
+                      className={usernameAlreadyInUse ? "border-destructive focus:border-destructive" : undefined}
+                    />
+                    {usernameAlreadyInUse ? (
+                      <span className="text-xs text-destructive">Este login já foi adicionado para outro usuário.</span>
+                    ) : null}
+                  </div>
                 </Field>
               </div>
 

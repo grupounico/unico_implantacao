@@ -5,8 +5,20 @@ import { deploymentService } from "../deployments/deployment.service";
 import { implantationAccessWhere, type AuthenticatedUser } from "../../lib/access-control";
 import { AUDIT_ACTIONS } from "../audit-logs/audit-log.constants";
 import { auditLogService } from "../audit-logs/audit-log.service";
+import { duplicateUsernames, invalidUsernames } from "../onboarding/onboarding.schema";
 
 type Actor = AuthenticatedUser & { name: string };
+
+function assertUniqueUsernames(responses: unknown) {
+  const invalid = invalidUsernames(responses);
+  if (invalid.length > 0) {
+    throw new ConflictError(`O login \"${invalid[0]}\" deve estar em letras minúsculas e não pode ter espaços.`);
+  }
+  const duplicates = duplicateUsernames(responses);
+  if (duplicates.length > 0) {
+    throw new ConflictError(`O login \"${duplicates[0]}\" foi informado mais de uma vez. Cada usuário deve ter um login único.`);
+  }
+}
 
 async function findImplantationWithOnboarding(implantationId: string, user: AuthenticatedUser) {
   const implantation = await prisma.implantation.findFirst({
@@ -46,6 +58,7 @@ async function updateReviewResponses(
   implantationId: string,
   responses: Record<string, unknown>, actor: Actor,
 ) {
+  assertUniqueUsernames(responses);
   const implantation = await findImplantationWithOnboarding(implantationId, actor);
 
   if (implantation.status !== "WAITING_REVIEW") {
@@ -80,6 +93,7 @@ async function approve(implantationId: string, approvedBy: string, actor: Actor)
 
   const onboarding = implantation.onboarding!;
   const approvedPayload = onboarding.reviewedResponses ?? onboarding.responses;
+  assertUniqueUsernames(approvedPayload);
 
   const lastSnapshot = await prisma.deploymentSnapshot.findFirst({
     where: { implantationId },
