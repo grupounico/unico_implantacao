@@ -46,6 +46,16 @@ function RequiredMark() {
 // sufixo poupa o implantador de digitar/colar sempre a mesma coisa.
 const INSTANCE_DOMAIN = "atenderbem.com";
 
+/**
+ * Remove acentos (ex: "ç" -> "c") enquanto a pessoa digita — sem isso, um
+ * subdomínio digitado com o nome da empresa (ex: "folhagemmanipulação")
+ * vira Punycode ilegível ("xn--...") quando o backend monta a URL. Mesma
+ * normalização em instance-url.ts.
+ */
+function stripAccents(value: string): string {
+  return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
 /** Se já vier com domínio/protocolo (colado de outro lugar), manda como está — o backend sabe lidar com isso. */
 function buildInstanceUrl(subdomainOrUrl: string): string {
   const trimmed = subdomainOrUrl.trim();
@@ -165,7 +175,7 @@ export function CreateImplantationSheet({ plans }: { plans: Plan[] }) {
                   id="instanceUrl"
                   placeholder="cliente"
                   value={instanceSubdomain}
-                  onChange={(e) => setInstanceSubdomain(e.target.value)}
+                  onChange={(e) => setInstanceSubdomain(stripAccents(e.target.value))}
                   className="h-auto flex-1 rounded-none border-0 bg-transparent shadow-none focus-visible:ring-0 dark:bg-transparent"
                   // O navegador não pode sugerir valores salvos de outras
                   // implantações aqui — cada uma é um subdomínio diferente.
