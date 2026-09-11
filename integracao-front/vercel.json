@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/ai-services/:match*",
+      "destination": "https://unicocontato.tech/ai-services/:match*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+name: Release Front
+
+on:
+  workflow_dispatch:
+    inputs:
+      level:
+        description: 'Tipo de release'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+      publish_news:
+        description: 'Publicar notícia no backend'
+        required: true
+        default: false
+        type: boolean
+      manual_items:
+        description: 'Itens manuais da release separados por | (opcional)'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Run release
+        env:
+          RELEASE_NEWS_BASE_URL: ${{ secrets.RELEASE_NEWS_BASE_URL }}
+        run: |
+          ARGS="--level ${{ inputs.level }} --push"
+          if [ "${{ inputs.publish_news }}" != "true" ]; then
+            ARGS="$ARGS --skip-news"
+          fi
+          if [ -n "${{ inputs.manual_items }}" ]; then
+            ARGS="$ARGS --items \"${{ inputs.manual_items }}\""
+          fi
+          eval "node ./scripts/release.mjs $ARGS"

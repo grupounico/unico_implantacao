@@ -1,0 +1,52 @@
+{
+  "name": "unicointegra",
+  "private": true,
+  "version": "1.4.1",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "version:patch": "npm version patch --no-git-tag-version",
+    "version:minor": "npm version minor --no-git-tag-version",
+    "build:patch": "npm run version:patch && npm run build",
+    "build:minor": "npm run version:minor && npm run build",
+    "release": "node ./scripts/release.mjs --level patch",
+    "release:patch": "node ./scripts/release.mjs --level patch",
+    "release:minor": "node ./scripts/release.mjs --level minor",
+    "release:major": "node ./scripts/release.mjs --level major",
+    "release:patch:push": "node ./scripts/release.mjs --level patch --push",
+    "release:minor:push": "node ./scripts/release.mjs --level minor --push",
+    "release:major:push": "node ./scripts/release.mjs --level major --push",
+    "release:notes": "node ./scripts/generate-release-notes.mjs",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@mdx-js/react": "^3.1.1",
+    "@mdx-js/rollup": "^3.1.1",
+    "@tailwindcss/vite": "^4.1.13",
+    "axios": "^1.12.1",
+    "lucide-react": "^0.561.0",
+    "path": "^0.12.7",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-icons": "^5.5.0",
+    "react-router-dom": "^7.8.0",
+    "tailwindcss": "^4.1.13"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.30.1",
+    "@types/node": "^24.2.0",
+    "@types/react": "^19.1.10",
+    "@types/react-dom": "^19.1.7",
+    "@vitejs/plugin-react": "^4.6.0",
+    "eslint": "^9.30.1",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.20",
+    "globals": "^16.3.0",
+    "sass-embedded": "^1.90.0",
+    "typescript": "~5.8.3",
+    "typescript-eslint": "^8.35.1",
+    "vite": "^7.0.4"
+  }
+}

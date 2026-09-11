@@ -1,0 +1,123 @@
+import { Link } from 'react-router-dom'
+import {
+  MethodBadge,
+  CodeBlock,
+  ParamsTable,
+  Callout,
+} from '../../components/DocsComponents'
+
+export const bodyParams = [
+  { field: 'instance', type: 'string', required: true, description: 'URL da instância que receberá a IA.' },
+  { field: 'username', type: 'string', required: true, description: 'Usuário usado para login na instância.' },
+  { field: 'password', type: 'string', required: true, description: 'Senha usada para login na instância.' },
+  { field: 'code', type: 'string', required: true, description: 'Código 2FA da instância.' },
+  { field: 'name', type: 'string', required: true, description: 'Nome final da IA.' },
+  { field: 'context', type: 'string', required: true, description: 'Prompt do sistema usado para orientar o comportamento do assistente.' },
+]
+
+# Criar IA Atendimento
+
+Cria uma IA genérica de atendimento com prompt editável e pré-processamento padrão.
+
+<MethodBadge method="POST" path="/api/ia/create-ai" />
+
+<Callout type="warning" title="Revise o contexto antes de instalar">
+  O campo <code>context</code> define o tom, os limites e as regras do assistente. Um
+  prompt ruim tende a gerar comportamento inconsistente, mesmo com a instalação concluída.
+</Callout>
+
+## Autenticação
+
+A autenticação operacional é enviada no body com `username`, `password` e `code`.
+No fluxo do painel, esses campos saem da sessão atual.
+
+Veja também: <Link to="/main/docs/getting-started/autenticacao">Autenticação</Link>
+
+## Pré-requisito operacional: gerar a API key da OpenAI
+
+Antes de instalar a **IA de Atendimento** ou preparar o ambiente operacional que sustentará a IA,
+gere e salve a chave da OpenAI.
+
+1. Acesse o site da OpenAI em `https://platform.openai.com/`.
+2. Faça login ou crie uma conta usando Google, Microsoft ou e-mail e senha.
+3. Depois de logado, acesse `https://platform.openai.com/api-keys` ou clique no perfil e depois em `View API keys`.
+4. Clique em `Create new secret key` e dê um nome para a chave.
+5. Copie o token gerado, no formato `sk-...`, e salve em local seguro.
+
+<Callout type="warning" title="Importante">
+  Essa chave aparece apenas uma vez. Salve a `OPENAI_API_KEY` em local seguro, como no arquivo
+  `.env`, antes de seguir para a criação da IA ou para o provisionamento do ambiente.
+</Callout>
+
+Exemplo no `.env`:
+
+<CodeBlock language="dotenv">{`OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxx`}</CodeBlock>
+
+Exemplo no Node.js:
+
+<CodeBlock language="javascript">{`import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});`}</CodeBlock>
+
+## Headers
+
+| Header | Valor |
+| --- | --- |
+| `Content-Type` | `application/json` |
+
+## Body
+
+<ParamsTable params={bodyParams} />
+
+## Fluxo interno
+
+- Autentica na instância.
+- Instala a automação `default_pre_automation.json`.
+- Cria um assistente base.
+- Atualiza o assistente com o template final e o `context` informado.
+
+## Exemplo de requisição
+
+<CodeBlock language="json">{`{
+  "instance": "https://cliente.exemplo.com",
+  "username": "operacao@cliente.com",
+  "password": "senha-da-instancia",
+  "code": "123456",
+  "name": "IA - Atendimento Loja Centro",
+  "context": "Você é o assistente humano da Farmácia Centro. Colete os dados do pedido com objetividade e transfira para um atendente quando necessário."
+}`}</CodeBlock>
+
+## Respostas
+
+### 200 OK
+
+<CodeBlock language="json">{`{
+  "id": 411,
+  "name": "IA - Atendimento Loja Centro",
+  "status": "configured",
+  "templateKey": "atendimento",
+  "instance": "https://cliente.exemplo.com",
+  "updatedAt": "2026-03-27T15:44:00.000Z"
+}`}</CodeBlock>
+
+### 400 Bad Request
+
+<CodeBlock language="json">{`{
+  "message": "O campo \\"context\\" é obrigatório"
+}`}</CodeBlock>
+
+### 500 Internal Server Error
+
+<CodeBlock language="json">{`{
+  "message": "Ocorreu um erro ao criar a IA. Falha ao criar a IA.",
+  "error": "Falha ao criar a IA."
+}`}</CodeBlock>
+
+## Ver também
+
+- <Link to="/main/docs/ias">Visão geral das IAs</Link>
+- <Link to="/main/docs/ias/alpha7">Criar IA Alpha 7</Link>
+- <Link to="/main/docs/getting-started/autenticacao">Autenticação</Link>
+- <Link to="/main/docs/erros">Tabela de erros</Link>

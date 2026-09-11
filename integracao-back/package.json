@@ -1,0 +1,41 @@
+{
+  "name": "back",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test test/*.test.js",
+    "test:catalog:e2e": "node test/catalogDeployment.e2e.mjs",
+    "dev": "nodemon --ignore builds-temporarios --ignore node_modules --ignore src/data/ai-template-workspaces.json src/server.js",
+    "totp": "node --input-type=module -r dotenv/config -e \"import { generateTotpToken } from './src/services/totp.services.js'; console.log(generateTotpToken(process.env.INSTANCE_SERVICE_TOTP_SECRET, { digits: Number(process.env.INSTANCE_SERVICE_TOTP_DIGITS || 6), period: Number(process.env.INSTANCE_SERVICE_TOTP_PERIOD_SECONDS || 30) }));\""
+
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.2.0",
+    "@prisma/client": "^7.2.0",
+    "archiver": "^7.0.1",
+    "axios": "^1.12.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "fs-extra": "^11.3.1",
+    "helmet": "^6.1.2",
+    "mysql2": "^3.14.4",
+    "nodemon": "^3.1.10",
+    "openai": "^6.33.0",
+    "pg": "^8.16.3",
+    "rimraf": "^6.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.3",
+    "@types/pg": "^8.16.0",
+    "prisma": "^7.2.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}

@@ -1,0 +1,384 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+model AiVersion {
+  id        Int      @id @default(autoincrement())
+  instance  String   @db.VarChar(255)
+  version   Int
+  payload   Json
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+
+  @@unique([instance, version])
+  @@index([instance])
+  @@index([createdAt])
+  @@map("ai_versions")
+  @@schema("sistema")
+}
+
+model AiTemplateBase {
+  id              Int      @id @default(autoincrement())
+  templateKey     String   @db.VarChar(100)
+  templateName    String   @db.VarChar(255)
+  version         Int
+  templateContent String
+  contentType     String   @default("json-template") @db.VarChar(50)
+  sourcePath      String?  @db.VarChar(255)
+  immutablePaths  Json?
+  ivrBindings     Json?
+  isCurrent       Boolean  @default(true)
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now()) @db.Timestamp(6)
+  updatedAt       DateTime @updatedAt @db.Timestamp(6)
+
+  @@unique([templateKey, version])
+  @@index([templateKey, isCurrent])
+  @@index([isCurrent])
+  @@map("ai_template_bases")
+  @@schema("sistema")
+}
+
+model AiProviderTemplate {
+  id                     Int      @id @default(autoincrement())
+  provider               String   @db.VarChar(50)
+  templateName           String   @db.VarChar(255)
+  version                Int
+  assistantTemplate      String
+  preProcessTemplate     String
+  buscaProdutosTemplate  String
+  downloadImagemTemplate String
+  uraTemplate            String
+  uraAbTemplate          String
+  componentVersions      Json?
+  isCurrent              Boolean  @default(true)
+  isActive               Boolean  @default(true)
+  createdAt              DateTime @default(now()) @db.Timestamp(6)
+  updatedAt              DateTime @updatedAt @db.Timestamp(6)
+
+  @@unique([provider, version])
+  @@index([provider, isCurrent])
+  @@map("ai_provider_templates")
+  @@schema("sistema")
+}
+
+model AiClientInstallation {
+  id                         Int      @id @default(autoincrement())
+  instance                   String   @db.VarChar(255)
+  provider                   String   @db.VarChar(50)
+  assistantId                String?  @db.VarChar(100)
+  assistantName              String?  @db.VarChar(255)
+  installedVersion           Int?
+  source                     String   @default("managed") @db.VarChar(50)
+  configSnapshot             Json?
+  installedComponentVersions Json?
+  preProcessId               String?  @db.VarChar(100)
+  buscaProdutosId            String?  @db.VarChar(100)
+  downloadImagemId           String?  @db.VarChar(100)
+  uraIaId                    String?  @db.VarChar(100)
+  uraAbId                    String?  @db.VarChar(100)
+  lastSyncStatus             String   @default("installed") @db.VarChar(50)
+  lastSyncError              String?
+  createdAt                  DateTime @default(now()) @db.Timestamp(6)
+  updatedAt                  DateTime @updatedAt @db.Timestamp(6)
+
+  @@unique([instance, assistantId])
+  @@index([instance])
+  @@index([provider])
+  @@map("ai_client_installations")
+  @@schema("sistema")
+}
+
+datasource db {
+  provider = "postgresql"
+  schemas  = ["sistema"]
+}
+
+model news {
+  id          Int       @id @default(autoincrement())
+  title       String    @db.VarChar(255)
+  description String
+  type        String    @db.VarChar(50)
+  created_at  DateTime? @default(now()) @db.Timestamp(6)
+
+  @@schema("sistema")
+}
+
+model SystemLog {
+  id        Int      @id @default(autoincrement())
+  userName  String   @db.VarChar(255)
+  action    String
+  target    String?
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+
+  @@index([createdAt])
+  @@index([userName])
+  @@map("system_logs")
+  @@schema("sistema")
+}
+
+model Client {
+  id                           Int                   @id @default(autoincrement())
+  name                         String                @unique @db.VarChar(255)
+  businessUnit                 String?               @db.VarChar(255)
+  cnpj                         String?               @db.VarChar(20)
+  clientInstance               String?               @db.VarChar(255)
+  provider                     String                @db.VarChar(30)
+  instance                     String
+  credential                   String?
+  credentialEncrypted          String?
+  multiProviderTenantId        Int?
+  multiProviderApiKey          String?
+  multiProviderApiKeyEncrypted String?
+  alpha7Port                   Int?
+  alpha7Database               String?               @db.VarChar(255)
+  alpha7User                   String?               @db.VarChar(255)
+  alpha7Schema                 String?               @default("public") @db.VarChar(100)
+  automatizaShopId             Int?
+  deliveryCompanyId            String?               @db.VarChar(100)
+  deliveryErpId                String?               @db.VarChar(100)
+  createdAt                    DateTime              @default(now()) @db.Timestamp(6)
+  updatedAt                    DateTime              @updatedAt @db.Timestamp(6)
+  importJobs                   BancoUnicoImportJob[]
+
+  @@index([provider])
+  @@map("clients")
+  @@schema("sistema")
+}
+
+model BancoUnicoImportJob {
+  id                Int                     @id @default(autoincrement())
+  clientId          Int?
+  client            Client?                 @relation(fields: [clientId], references: [id])
+  clientName        String                  @db.VarChar(255)
+  sourceType        String                  @db.VarChar(30)
+  sourceLabel       String?
+  status            String                  @default("pending") @db.VarChar(30)
+  mode              String                  @default("publish") @db.VarChar(30)
+  requestedBy       String                  @db.VarChar(255)
+  currentStage      String?                 @db.VarChar(100)
+  currentMessage    String?
+  progressCurrent   Int                     @default(0)
+  progressTotal     Int                     @default(0)
+  progressPercent   Float                   @default(0)
+  totalCatalogValid Int                     @default(0)
+  totalInvalidEans  Int                     @default(0)
+  totalSampled      Int                     @default(0)
+  totalSelected     Int                     @default(0)
+  totalExisting     Int                     @default(0)
+  totalPrepared     Int                     @default(0)
+  totalSkipped      Int                     @default(0)
+  totalErrors       Int                     @default(0)
+  totalPublished    Int                     @default(0)
+  options           Json?
+  summary           Json?
+  workerId          String?                 @db.VarChar(255)
+  workerHeartbeatAt DateTime?               @db.Timestamp(6)
+  startedAt         DateTime?               @db.Timestamp(6)
+  finishedAt        DateTime?               @db.Timestamp(6)
+  createdAt         DateTime                @default(now()) @db.Timestamp(6)
+  updatedAt         DateTime                @updatedAt @db.Timestamp(6)
+  items             BancoUnicoImportItem[]
+  events            BancoUnicoImportEvent[]
+
+  @@index([clientName])
+  @@index([clientId])
+  @@index([status])
+  @@index([workerHeartbeatAt])
+  @@index([createdAt])
+  @@map("banco_unico_import_jobs")
+  @@schema("sistema")
+}
+
+model BancoUnicoImportItem {
+  id               Int                 @id @default(autoincrement())
+  jobId            Int
+  externalKey      String              @unique @db.VarChar(255)
+  sourceProductId  Int?
+  ean              String?             @db.VarChar(20)
+  nameOriginal     String?
+  nameNormalized   String?
+  manufacturer     String?
+  activeIngredient String?
+  status           String              @db.VarChar(40)
+  skippedReason    String?             @db.VarChar(100)
+  errorStage       String?             @db.VarChar(100)
+  errorMessage     String?
+  confidence       String?             @db.VarChar(20)
+  needsReview      Boolean             @default(false)
+  taxonomy         Json?
+  metadata         Json?
+  payload          Json?
+  sourcePayload    Json?
+  publishedAt      DateTime?           @db.Timestamp(6)
+  createdAt        DateTime            @default(now()) @db.Timestamp(6)
+  updatedAt        DateTime            @updatedAt @db.Timestamp(6)
+  job              BancoUnicoImportJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@index([jobId])
+  @@index([jobId, status])
+  @@index([ean])
+  @@index([createdAt])
+  @@map("banco_unico_import_items")
+  @@schema("sistema")
+}
+
+model BancoUnicoImportEvent {
+  id        Int                 @id @default(autoincrement())
+  jobId     Int
+  level     String              @default("info") @db.VarChar(20)
+  message   String
+  data      Json?
+  createdAt DateTime            @default(now()) @db.Timestamp(6)
+  job       BancoUnicoImportJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@index([jobId, id])
+  @@index([createdAt])
+  @@map("banco_unico_import_events")
+  @@schema("sistema")
+}
+
+model ClientDeployment {
+  id                    String                  @id @default(uuid()) @db.Uuid
+  idempotencyKey        String                  @unique @db.VarChar(255)
+  payloadHash           String                  @db.VarChar(64)
+  groupCnpj             String                  @db.VarChar(14)
+  groupName             String                  @db.VarChar(255)
+  username              String                  @db.VarChar(50)
+  environment           String                  @default("production") @db.VarChar(20)
+  status                String                  @default("draft") @db.VarChar(50)
+  currentStage          String?                 @db.VarChar(100)
+  requestedBy           String                  @db.VarChar(255)
+  correlationId         String?                 @db.VarChar(255)
+  hubSellerId           BigInt?
+  sellerApiKeyEncrypted String?
+  inputSnapshot         Json
+  activationSnapshot    Json?
+  lastErrorCode         String?                 @db.VarChar(100)
+  lastErrorMessage      String?
+  retryable             Boolean                 @default(false)
+  workerId              String?                 @db.VarChar(255)
+  workerHeartbeatAt     DateTime?               @db.Timestamp(6)
+  startedAt             DateTime?               @db.Timestamp(6)
+  finishedAt            DateTime?               @db.Timestamp(6)
+  activatedAt           DateTime?               @db.Timestamp(6)
+  activatedBy           String?                 @db.VarChar(255)
+  createdAt             DateTime                @default(now()) @db.Timestamp(6)
+  updatedAt             DateTime                @updatedAt @db.Timestamp(6)
+  units                 ClientDeploymentUnit[]
+  assets                ClientDeploymentAsset[]
+  steps                 ClientDeploymentStep[]
+  events                ClientDeploymentEvent[]
+
+  @@index([status, workerHeartbeatAt])
+  @@index([environment, status])
+  @@index([groupCnpj])
+  @@index([username])
+  @@index([createdAt])
+  @@map("client_deployments")
+  @@schema("sistema")
+}
+
+model ClientDeploymentUnit {
+  id                       String                  @id @default(uuid()) @db.Uuid
+  deploymentId             String                  @db.Uuid
+  deployment               ClientDeployment        @relation(fields: [deploymentId], references: [id], onDelete: Cascade)
+  code                     String                  @db.VarChar(100)
+  name                     String                  @db.VarChar(255)
+  cnpj                     String                  @db.VarChar(14)
+  slug                     String                  @db.VarChar(100)
+  isInitial                Boolean                 @default(false)
+  provider                 String                  @default("alpha7") @db.VarChar(30)
+  sourceUnitId             Int
+  credentialRefEncrypted   String
+  publicationMode          String                  @default("shadow") @db.VarChar(20)
+  pageSize                 Int                     @default(500)
+  validEanDropThresholdBps Int                     @default(1000)
+  status                   String                  @default("pending") @db.VarChar(60)
+  hubSellerUnitId          BigInt?
+  hubIntegrationId         BigInt?
+  latestRunId              String?                 @db.VarChar(255)
+  latestRunStatus          String?                 @db.VarChar(50)
+  latestValidRows          Int?
+  latestRunFinishedAt      DateTime?               @db.Timestamp(6)
+  unicommerceTenantId      String?                 @db.VarChar(255)
+  clientId                 Int?
+  bancoUnicoImportJobId    Int?
+  lastErrorCode            String?                 @db.VarChar(100)
+  lastErrorMessage         String?
+  retryable                Boolean                 @default(false)
+  createdAt                DateTime                @default(now()) @db.Timestamp(6)
+  updatedAt                DateTime                @updatedAt @db.Timestamp(6)
+  events                   ClientDeploymentEvent[]
+
+  @@unique([deploymentId, code])
+  @@unique([deploymentId, provider, sourceUnitId])
+  @@unique([hubSellerUnitId])
+  @@index([deploymentId, status])
+  @@index([bancoUnicoImportJobId])
+  @@map("client_deployment_units")
+  @@schema("sistema")
+}
+
+model ClientDeploymentAsset {
+  id             String           @id @default(uuid()) @db.Uuid
+  deploymentId   String           @db.Uuid
+  deployment     ClientDeployment @relation(fields: [deploymentId], references: [id], onDelete: Cascade)
+  type           String           @db.VarChar(30)
+  uploadId       String?          @db.VarChar(255)
+  objectKey      String?          @db.VarChar(500)
+  publicUrl      String?
+  mimeType       String?          @db.VarChar(100)
+  sizeBytes      Int?
+  checksumSha256 String?          @db.VarChar(64)
+  width          Int?
+  height         Int?
+  status         String           @default("pending") @db.VarChar(30)
+  createdAt      DateTime         @default(now()) @db.Timestamp(6)
+  updatedAt      DateTime         @updatedAt @db.Timestamp(6)
+
+  @@unique([deploymentId, type])
+  @@index([deploymentId, status])
+  @@map("client_deployment_assets")
+  @@schema("sistema")
+}
+
+model ClientDeploymentStep {
+  id               String           @id @default(uuid()) @db.Uuid
+  deploymentId     String           @db.Uuid
+  deployment       ClientDeployment @relation(fields: [deploymentId], references: [id], onDelete: Cascade)
+  unitId           String?          @db.Uuid
+  step             String           @db.VarChar(100)
+  status           String           @db.VarChar(30)
+  attempt          Int              @default(1)
+  idempotencyKey   String?          @db.VarChar(255)
+  requestSnapshot  Json?
+  responseSnapshot Json?
+  errorCode        String?          @db.VarChar(100)
+  errorMessage     String?
+  startedAt        DateTime         @default(now()) @db.Timestamp(6)
+  finishedAt       DateTime?        @db.Timestamp(6)
+
+  @@index([deploymentId, unitId, step])
+  @@map("client_deployment_steps")
+  @@schema("sistema")
+}
+
+model ClientDeploymentEvent {
+  id           String                @id @default(uuid()) @db.Uuid
+  deploymentId String                @db.Uuid
+  deployment   ClientDeployment      @relation(fields: [deploymentId], references: [id], onDelete: Cascade)
+  unitId       String?               @db.Uuid
+  unit         ClientDeploymentUnit? @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  eventType    String                @db.VarChar(100)
+  fromStatus   String?               @db.VarChar(60)
+  toStatus     String?               @db.VarChar(60)
+  httpStatus   Int?
+  safeMetadata Json?
+  createdBy    String?               @db.VarChar(255)
+  createdAt    DateTime              @default(now()) @db.Timestamp(6)
+
+  @@index([deploymentId, createdAt])
+  @@index([unitId, createdAt])
+  @@map("client_deployment_events")
+  @@schema("sistema")
+}

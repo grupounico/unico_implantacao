@@ -1,0 +1,12 @@
+.active {
+  background: var(--color-primary);
+}
+
+@media (max-width: 1450px) {
+  .nav-list {
+    gap: 10px;
+  }
+  .nav-list li {
+    padding: 10px;
+  }
+}/*# sourceMappingURL=Header.css.map */

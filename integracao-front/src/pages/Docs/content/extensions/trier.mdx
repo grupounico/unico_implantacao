@@ -1,0 +1,257 @@
+import { Link } from 'react-router-dom'
+import {
+  PageHeader,
+  ParamsTable,
+  Callout,
+  CodeBlock,
+} from '../../components/DocsComponents'
+
+export const generatorParams = [
+  { field: 'instance_url', type: 'string', required: true, description: 'URL da instância do cliente. Esse é o dado correto para gerar a extensão.' },
+  { field: 'client_token', type: 'string', required: true, description: 'Token de integração da Trier usado para autenticar a sincronização de produtos.' },
+]
+
+export const validationChecklist = [
+  { field: 'login', type: 'check', required: true, description: 'Confirmar que a extensão aceita login de operador e bloqueia usuário administrador.' },
+  { field: 'sincronizacao', type: 'check', required: true, description: 'Validar se os produtos carregam após o login e se a sincronização manual funciona.' },
+  { field: 'orcamento', type: 'check', required: true, description: 'Adicionar produto, quantidade e desconto para validar o orçamento.' },
+  { field: 'chat', type: 'check', required: true, description: 'Selecionar chat aberto, informar pagamento e CPF e concluir o envio final.' },
+]
+
+<PageHeader
+  badge="Extensões - Trier"
+  title="Extensão Trier"
+  description="Procedimento operacional para gerar o ZIP da extensão, instalar no Google Chrome e homologar o fluxo no navegador do cliente."
+/>
+
+<Callout type="warning" title="Separação de fluxo">
+  Esta página é da <strong>Extensão Trier</strong>. Se a demanda for de criação de assistente,
+  serviço IA Trier API ou implantação de IA, use a doc de <Link to="/main/docs/ias/trier">IA Trier</Link>.
+</Callout>
+
+## Visão geral do processo
+
+1. Receber a **URL da instância do cliente**.
+2. Receber o **token da Trier**.
+3. Acessar **Serviços > Extensão Trier** no painel.
+4. Gerar e baixar o ZIP final.
+5. **Depois do download, solicitar ao cliente o AnyDesk dele**.
+6. Passar o ZIP para a máquina do cliente.
+7. Extrair o conteúdo.
+8. Adicionar a extensão no Google Chrome como extensão descompactada.
+9. Testar login, sincronização, orçamento e envio em chat.
+
+## Dados necessários para gerar
+
+<ParamsTable params={generatorParams} />
+
+<Callout type="info" title="Regra principal">
+  O campo correto é sempre a <strong>URL da instância do cliente</strong>. Não use URL aleatória,
+  URL interna ou outro endereço fora da instância real do cliente.
+</Callout>
+
+## Como preencher a URL da instância
+
+Exemplo correto:
+
+<CodeBlock language="text">{`https://cliente.atenderbem.com/`}</CodeBlock>
+
+Também funciona se a URL vier sem a barra final:
+
+<CodeBlock language="text">{`https://cliente.atenderbem.com`}</CodeBlock>
+
+Observações:
+
+- o backend normaliza a URL automaticamente e adiciona `/` no final;
+- mesmo assim, o ideal é sempre preencher a URL completa da instância do cliente;
+- o token deve ser o token real de integração da Trier daquele cliente.
+
+## Passo 1: Gerar o ZIP da extensão
+
+No painel interno:
+
+1. acesse **Serviços**;
+2. abra o card **Extensão Trier**;
+3. preencha a URL da instância do cliente;
+4. cole o token da Trier;
+5. clique em **Iniciar Geração**.
+
+Esse processo monta o build final da extensão e baixa um `.zip` com os arquivos prontos para uso no Chrome.
+
+## Passo 2: Fazer o repasse para a máquina do cliente
+
+Depois que o ZIP for baixado:
+
+1. solicite ao cliente o **AnyDesk**;
+2. acesse a máquina dele;
+3. copie o arquivo `.zip` para a máquina do cliente;
+4. salve em uma pasta fácil de localizar, como `Downloads` ou `Área de Trabalho`.
+
+<Callout type="warning" title="Importante">
+  O processo não termina no download. Depois de baixar, é obrigatório pedir o AnyDesk do cliente,
+  levar o ZIP para a máquina dele e concluir a instalação diretamente no navegador dele.
+</Callout>
+
+## Passo 3: Extrair o ZIP
+
+Na máquina do cliente:
+
+1. localize o arquivo `.zip`;
+2. clique com o botão direito;
+3. escolha **Extrair Tudo...**;
+4. conclua a extração.
+
+Depois disso, confirme se a pasta extraída contém o arquivo:
+
+<CodeBlock language="text">{`manifest.json`}</CodeBlock>
+
+Se a pasta escolhida não tiver `manifest.json`, o Chrome não vai carregar a extensão.
+
+## Passo 4: Instalar no Google Chrome
+
+No Chrome da máquina do cliente:
+
+1. abra `chrome://extensions`;
+2. ative o **Modo do desenvolvedor**;
+3. clique em **Carregar sem compactação**;
+4. selecione a pasta extraída da extensão;
+5. confirme a seleção.
+
+## Pasta correta para carregar
+
+A pasta correta é a que contém diretamente:
+
+- `manifest.json`
+- `index.html`
+- `background.js`
+- pasta `assets`
+
+Não selecione:
+
+- o arquivo `.zip`;
+- uma pasta acima da pasta real da extensão;
+- uma subpasta sem `manifest.json`.
+
+## O que esperar depois da instalação
+
+Se a instalação estiver correta:
+
+- a extensão aparece na lista do `chrome://extensions`;
+- o Chrome não exibe erro de manifesto;
+- o ícone da extensão fica disponível na barra de extensões;
+- ao clicar no ícone, o popup da extensão abre.
+
+Se quiser facilitar o uso do cliente, fixe a extensão na barra do navegador.
+
+## Passo 5: Primeiro uso
+
+Ao abrir a extensão:
+
+1. a tela de login será exibida;
+2. faça login com um **usuário operador** da instância do cliente;
+3. aguarde a sincronização inicial dos produtos.
+
+Importante:
+
+- usuários administradores não podem usar esse login pela extensão;
+- se o login for de administrador, a extensão bloqueia o acesso;
+- após o login, a extensão sincroniza os produtos e mantém atualização periódica em segundo plano.
+
+## Como testar
+
+<ParamsTable params={validationChecklist} />
+
+### Teste 1: Login
+
+Valide se:
+
+- o login foi aceito;
+- a tela saiu do login;
+- a tela principal abriu sem erro.
+
+### Teste 2: Sincronização
+
+Valide se:
+
+- a sincronização inicial concluiu;
+- a busca de produtos retorna itens;
+- o botão manual de sincronização conclui sem falha.
+
+### Teste 3: Orçamento
+
+Na tela principal:
+
+1. selecione um produto;
+2. informe quantidade;
+3. informe desconto, se necessário;
+4. adicione ao orçamento.
+
+Confira se o item aparece corretamente e se é possível avançar.
+
+### Teste 4: Delivery
+
+Quando o cenário exigir entrega:
+
+1. marque `Delivery`;
+2. preencha CEP, endereço e taxa de entrega;
+3. avance para a tela de chats.
+
+### Teste 5: Envio para chat
+
+Na etapa final:
+
+1. selecione um chat aberto do operador;
+2. escolha a forma de pagamento;
+3. preencha o CPF do cliente;
+4. clique em **Finalizar**.
+
+## Critério de homologação
+
+Considere a instalação homologada quando:
+
+- a extensão abre normalmente;
+- o login funciona;
+- os produtos carregam;
+- o orçamento é montado;
+- o chat é selecionado;
+- a mensagem final é enviada sem erro.
+
+## Problemas mais comuns
+
+### O Chrome não aceita a extensão
+
+Verifique se:
+
+- foi selecionado o `.zip` em vez da pasta extraída;
+- a pasta escolhida não contém `manifest.json`;
+- foi carregada a pasta errada.
+
+### O login não funciona
+
+Verifique se:
+
+- a URL usada para gerar era realmente a **URL da instância do cliente**;
+- o usuário e a senha estão corretos;
+- a conta usada não é de administrador.
+
+### Os produtos não aparecem
+
+Verifique se:
+
+- o token da Trier usado na geração está correto;
+- a sincronização inicial terminou;
+- a sincronização manual conclui sem erro.
+
+### Não existem chats para finalizar
+
+Verifique se:
+
+- o operador tem fila vinculada;
+- existe chat aberto para aquele operador;
+- a instância do cliente está respondendo normalmente.
+
+## Ver também
+
+- <Link to="/main/docs/extensoes">Visão geral das extensões</Link>
+- <Link to="/main/docs/ias/trier">IA Trier</Link>
+- <Link to="/main/docs/changelog">Changelog</Link>

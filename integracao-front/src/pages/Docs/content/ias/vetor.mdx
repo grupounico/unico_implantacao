@@ -1,0 +1,129 @@
+import { Link } from 'react-router-dom'
+import {
+  ParamsTable,
+  Callout,
+  CodeBlock,
+} from '../../components/DocsComponents'
+
+export const installParams = [
+  { field: 'name', type: 'string', required: true, description: 'Nome final da IA.' },
+  { field: 'instance', type: 'string', required: true, description: 'URL da instância onde a IA será instalada.' },
+  { field: 'clientName', type: 'string', required: true, description: 'Nome da loja.' },
+  { field: 'apiKey', type: 'string', required: true, description: 'API key global do sistema usada na instalação.' },
+  { field: 'vetorToken', type: 'string', required: true, description: 'Token enviado pela Vetor para autenticar a integração.' },
+  { field: 'code', type: 'string', required: true, description: 'Código 2FA para autorizar a criação da IA.' },
+]
+
+# IA Vetor
+
+Esta página deve ser lida como **procedimento de implantação** da Vetor.
+O foco aqui é operacional: solicitar as credenciais, validar internamente, instalar a IA e homologar.
+
+<Callout type="info" title="Primeiro passo">
+  Assim que o cliente chegar, a solicitação das credenciais da Vetor deve ser feita diretamente
+  no grupo do WhatsApp. Depois disso, confirme com Maicon ou Moara antes de prosseguir com os dados do cliente.
+</Callout>
+
+## Visão geral do processo
+
+1. Solicitar as credenciais da Vetor e-mail.
+2. Validar com Maicon ou Moara antes de seguir com os dados do cliente.
+3. Gerar a API key da OpenAI.
+4. Acessar o módulo de IAs e configurar a IA Vetor.
+5. Verificar se a fila possui a API key correta.
+6. Homologar antes de liberar em produção.
+
+## Passo 1: Solicitar as credenciais
+
+Assim que o cliente chegar, solicite as credenciais da Vetor pelo e-mail com CNPJ, contato do cliente (nome e telefone) 
+ 
+marilia.campestrini@zetti.tech 
+matheus.dinis@zetti.tech 
+mariana.ferreira@zetti.tech 
+ 
+Telefone do CS para dúvidas: 55 62 9821-7607.
+
+Esse é o ponto de partida da implantação. Sem o token enviado pela Vetor, a configuração da IA não deve começar.
+
+## Passo 2: Validar internamente
+
+Quando a solicitação for feita, valide o recebimento e funcionamento das credênciais antes de prosseguir com a
+solicitação dos dados do cliente.
+
+Essa validação deve acontecer antes da instalação, para garantir que o processo está liberado para seguir.
+
+## Passo 3: Gerar a API key da OpenAI
+
+Antes de instalar a **IA Vetor**, gere e salve a chave da OpenAI que será usada no ambiente
+operacional da IA.
+
+1. Acesse o site da OpenAI em `https://platform.openai.com/`.
+2. Faça login ou crie uma conta usando Google, Microsoft ou e-mail e senha.
+3. Depois de logado, acesse `https://platform.openai.com/api-keys` ou clique no perfil e depois em `View API keys`.
+4. Clique em `Create new secret key` e dê um nome para a chave.
+5. Copie o token gerado, no formato `sk-...`, e salve em local seguro.
+
+<Callout type="warning" title="Importante">
+  Essa chave aparece apenas uma vez. Salve a `OPENAI_API_KEY` em local seguro, como no arquivo
+  `.env`, antes de continuar para a criação da IA.
+</Callout>
+
+Exemplo no `.env`:
+
+<CodeBlock language="dotenv">{`OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxx`}</CodeBlock>
+
+Exemplo no Node.js:
+
+<CodeBlock language="javascript">{`import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});`}</CodeBlock>
+
+Se o fluxo operacional da unidade incluir criação de serviço ou configuração de ambiente,
+use a chave gerada no campo **OpenAI API Key** antes de prosseguir.
+
+## Passo 4: Instalar a IA Vetor
+
+Depois de receber os dados, vá diretamente para a **sexta opção da barra lateral do sistema**,
+na área de **IAs**, e entre em **Configurar IA Vetor**.
+
+Preencha os campos da instalação:
+
+<ParamsTable params={installParams} />
+
+Esses dados são os que autorizam a criação da IA na instância do cliente.
+
+<Callout type="warning" title="Ponto de atenção">
+  O token enviado pela Vetor é obrigatório. Sem ele, a instalação não deve prosseguir.
+</Callout>
+
+## Passo 5: Verificar a API key da fila
+
+Antes de vincular a IA a uma fila de atendimento, confira se a fila tem uma API key definida.
+
+Essa API key precisa estar alinhada com a API key global informada na instalação.
+Se a fila estiver sem essa chave, a integração não vai funcionar.
+
+<Callout type="warning" title="Validação obrigatória">
+  Se a fila não tiver API key, ou se a chave estiver diferente da API key global usada na instalação,
+  a IA não vai funcionar corretamente no atendimento.
+</Callout>
+
+## Passo 6: Homologação inicial
+
+Após a instalação:
+
+- configure a URAB inicialmente para transferir apenas para a loja e para você
+- rode a validação e homologação junto com o cliente
+- confirme se a IA está respondendo bem
+- só depois direcione definitivamente para o cliente
+
+Essa etapa é obrigatória antes de liberar o fluxo em produção.
+
+## Ver também
+
+- <Link to="/main/docs/ias">Visão geral das IAs</Link>
+- <Link to="/main/docs/getting-started/autenticacao">Autenticação</Link>
+- <Link to="/main/docs/erros">Tabela de erros</Link>
+

@@ -1,0 +1,239 @@
+import { Link } from 'react-router-dom'
+import {
+  ParamsTable,
+  Callout,
+  CodeBlock,
+} from '../../components/DocsComponents'
+
+export const serviceParams = [
+  { field: 'nome_da_loja', type: 'string', required: true, description: 'Nome da loja que será atendida pelo serviço.' },
+  { field: 'unidade_negocio', type: 'string', required: true, description: 'Unidade de negócio descoberta no teste do banco.' },
+  { field: 'db_host', type: 'string', required: true, description: 'IP externo ou DDNS liberado pelo cliente.' },
+  { field: 'db_port', type: 'string', required: true, description: 'Porta do banco PostgreSQL (DB_PORT). A porta da API é gerada automaticamente pelo módulo de serviços.' },
+  { field: 'db_name', type: 'string', required: true, description: 'Nome do banco de dados da loja.' },
+  { field: 'db_user', type: 'string', required: true, description: 'Usuário com permissão de leitura.' },
+  { field: 'db_password', type: 'string', required: true, description: 'Senha do usuário de leitura.' },
+  { field: 'openai_api_key', type: 'string', required: true, description: 'Chave da OpenAI gerada no passo 6 e usada pelo serviço da IA Alpha 7 API.' },
+]
+
+export const installParams = [
+  { field: 'name', type: 'string', required: true, description: 'Nome final da IA na instância.' },
+  { field: 'instance', type: 'string', required: true, description: 'URL da instância onde a IA será instalada.' },
+  { field: 'nome_cliente', type: 'string', required: true, description: 'Nome da loja ou cliente atendido.' },
+  { field: 'apiKey', type: 'string', required: true, description: 'API key global usada pelo sistema e pela fila.' },
+  { field: 'porta_cliente', type: 'string', required: true, description: 'Porta da API criada automaticamente no módulo de serviços. Use a porta retornada na instância provisionada.' },
+  { field: 'unidade_negocio', type: 'string', required: true, description: 'Unidade de negócio validada no teste de banco.' },
+  { field: 'code', type: 'string', required: true, description: 'Código 2FA para autorizar a criação da IA.' },
+]
+
+# IA Alpha 7
+
+Esta página deve ser lida primeiro como **procedimento de implantação**.
+A API de criação da IA entra só no final, como apoio técnico da etapa de instalação.
+
+<Callout type="warning" title="Quando o prazo de entrega começa">
+  O prazo só deve começar a contar quando o cliente já tiver liberado acesso de leitura ao banco,
+  acesso externo ao host e todos os dados técnicos necessários para teste e criação da instância.
+</Callout>
+
+## Visão geral do processo
+
+O fluxo do Alpha 7 hoje é este:
+
+1. Coletar os dados do solicitante e da empresa contratante.
+2. Enviar o e-mail formal de liberação de leitura no banco.
+3. Aguardar assinatura, liberação de dados e retorno do cliente.
+4. Solicitar IP fixo ou DDNS e liberação da porta externa do banco.
+5. Testar a conexão no módulo de banco de dados e identificar a unidade de negócio.
+6. Gerar a API key da OpenAI.
+7. Criar a API do Alpha 7 no módulo de serviços.
+8. Instalar a IA no módulo de IAs.
+9. Validar fila, URAB e homologação inicial com o cliente.
+10. Finalizar a homologação antes de liberar o fluxo em produção.
+
+## Passo 1: Coleta inicial
+
+Antes de qualquer configuração, solicite estes dados:
+
+- Nome do solicitante
+- Telefone do solicitante
+- E-mail do solicitante
+- Razão social da empresa
+- CNPJ da empresa
+
+Essas informações são usadas no e-mail formal de liberação de leitura no banco.
+
+## Passo 2: E-mail de liberação de leitura
+
+O assunto deve ser:
+
+`Liberação de leitura no banco de dados`
+
+Envie para:
+
+- `financeiro@a7.net.br`
+- `thais.silva@a7.net.br`
+- `jessica.cristina@a7.net.br`
+
+Com cópia para:
+
+- `gabrielunico764@gmail.com`
+- `moara@unicocontato.com.br`
+- e-mail do cliente
+
+Modelo de e-mail:
+
+<CodeBlock language="text">{`Bom dia, Thais.
+
+Gostaria de solicitar a liberação de acesso de leitura ao nosso banco de dados
+para a empresa Unico Contato, que passará a prestar serviços à nossa organização.
+Abaixo, seguem os dados para formalização e configuração:
+
+OBS: Necessário liberar acesso ao IP 145.223.27.100 e realizar a liberação da porta
+para acesso externo.
+
+Dados do Solicitante
+Nome: [Seu Nome Completo]
+Telefone: [Seu Telefone com DDD]
+E-mail: [Seu E-mail Corporativo]
+Razão Social: [Inserir Razão Social da Sua Empresa]
+CNPJ: [Inserir CNPJ da Sua Empresa]
+
+Dados da Empresa Terceirizada (Prestadora)
+Razão Social: Diniz e Morato LTDA (Unico Contato)
+CNPJ: 42.926.765/0001-05
+
+Atenciosamente,`}</CodeBlock>
+
+## Passo 3: Aguardar retorno formal
+
+Depois do envio, aguarde:
+
+- assinatura do cliente
+- liberação dos dados
+- confirmação do acesso
+
+Sem isso, não avance para configuração técnica.
+
+## Passo 4: Liberação de acesso externo ao banco
+
+Assim que o acesso de leitura estiver liberado, oriente o cliente a falar com o TI interno
+ou com o provedor de internet para:
+
+- definir um IP fixo ou um DDNS dinâmico
+- liberar a porta `5432` para acesso externo
+- direcionar o IP externo para o IP interno do servidor do banco
+
+O objetivo aqui é permitir que a VPS da Unico Contato acesse diretamente o banco.
+
+## Passo 5: Teste de conexão no módulo de banco de dados
+
+Com os dados em mãos, acesse o instalador e entre na **segunda opção do sidebar**,
+no módulo de banco de dados, até a opção de **testar conexão**.
+
+Preencha:
+
+- host: IP externo ou DDNS definido pela loja
+- database: nome do banco
+- porta
+- usuário
+- senha de visualização
+
+Se necessário, use também o CNPJ da loja para localizar a unidade de negócio correta.
+
+O teste deve confirmar:
+
+- se o banco está acessível
+- se o acesso foi realmente liberado
+- qual é a unidade de negócio da loja
+
+<Callout type="info" title="Anote a unidade de negócio">
+  A unidade de negócio encontrada nessa etapa será usada depois na criação da API e da IA.
+  Esse valor não pode ser perdido.
+</Callout>
+
+## Passo 6: Gerar a API key da OpenAI
+
+Antes de criar o serviço **IA Alpha 7 API**, gere a chave da OpenAI que será usada no campo
+`openai_api_key` da instância do serviço.
+
+1. Acesse o site da OpenAI em `https://platform.openai.com/`.
+2. Faça login ou crie uma conta usando Google, Microsoft ou e-mail e senha.
+3. Depois de logado, acesse `https://platform.openai.com/api-keys` ou clique no perfil e depois em `View API keys`.
+4. Clique em `Create new secret key` e dê um nome para a chave.
+5. Copie o token gerado, no formato `sk-...`, e salve em local seguro.
+
+<Callout type="warning" title="Importante">
+  Essa chave aparece apenas uma vez. Salve a `OPENAI_API_KEY` em local seguro, como no arquivo
+  `.env`, antes de continuar para a criação do serviço.
+</Callout>
+
+Exemplo no `.env`:
+
+<CodeBlock language="dotenv">{`OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxx`}</CodeBlock>
+
+Exemplo no Node.js:
+
+<CodeBlock language="javascript">{`import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});`}</CodeBlock>
+
+## Passo 7: Criar o serviço IA Alpha 7 API
+
+Depois do teste, acesse a **terceira opção do sidebar**, no módulo de serviços,
+e abra o serviço **IA Alpha 7 API**.
+
+Na lista de serviços, clique em **Nova instância** e preencha:
+
+<ParamsTable params={serviceParams} />
+
+Observação importante: a utilização da IA depende da chave gerada no passo anterior.
+Sem ela, o serviço não deve ser provisionado.
+
+<Callout type="info" title="Diferença entre DB_PORT e porta da API">
+  No formulário de criação do serviço, `db_port` é a porta do PostgreSQL do cliente, normalmente `5432`.
+  Já a porta da API é outra: ela é criada automaticamente pelo módulo de serviços e é o valor que depois entra em `porta_cliente` na instalação da IA.
+</Callout>
+
+## Passo 8: Instalar a IA na instância
+
+Depois da API criada, vá para a **sexta opção do sidebar**, no módulo de IAs,
+e selecione o card do Alpha 7.
+
+Preencha os campos da tela:
+
+<ParamsTable params={installParams} />
+
+Esses dados são os que efetivamente destravam a criação da IA na instância do cliente.
+
+## Passo 9: Validar fila e API key
+
+Antes de vincular a IA a uma fila de atendimento, confira se a fila tem uma API key definida.
+
+Essa API key precisa estar alinhada com a API key global informada na instalação.
+Se a fila estiver sem essa chave, a integração não vai funcionar.
+
+<Callout type="warning" title="Ponto de extrema atenção">
+  Fila sem API key, ou com API key diferente da usada no serviço, quebra a integração
+  mesmo que a IA tenha sido criada com sucesso.
+</Callout>
+
+## Passo 10: Homologação inicial
+
+Após a instalação:
+
+- configure a URAB inicialmente para transferir apenas para a loja e para você
+- rode a validação e homologação junto com o cliente
+- confirme se a IA está respondendo bem
+- só depois direcione definitivamente para o cliente
+
+Essa etapa é obrigatória antes de liberar o fluxo em produção.
+
+## Ver também
+
+- <Link to="/main/docs/ias">Visão geral das IAs</Link>
+- <Link to="/main/docs/ias/vannon">Criar IA Vannon</Link>
+- <Link to="/main/docs/ias/atendimento">Criar IA Atendimento</Link>
+- <Link to="/main/docs/erros">Tabela de erros</Link>

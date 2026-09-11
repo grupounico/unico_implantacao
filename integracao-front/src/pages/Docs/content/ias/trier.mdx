@@ -1,0 +1,150 @@
+import { Link } from 'react-router-dom'
+import {
+  ParamsTable,
+  Callout,
+  CodeBlock,
+} from '../../components/DocsComponents'
+
+export const serviceAccessParams = [
+  { field: 'token', type: 'string', required: true, description: 'Token da API enviado pela Trier ou repassado pelo cliente.' },
+]
+
+export const installParams = [
+  { field: 'name', type: 'string', required: true, description: 'Nome final da IA na instância.' },
+  { field: 'instance', type: 'string', required: true, description: 'URL da instância onde a IA será instalada.' },
+  { field: 'nomeCliente', type: 'string', required: true, description: 'Nome da farmácia ou da loja.' },
+  { field: 'porta_cliente', type: 'string', required: true, description: 'Porta da API criada no serviço IA Trier API.' },
+  { field: 'apiKey', type: 'string', required: true, description: 'API key global do sistema usada na instalação.' },
+  { field: 'code', type: 'string', required: true, description: 'Código 2FA para autorizar a criação da IA.' },
+]
+
+# IA Trier
+
+Esta página deve ser lida como **procedimento de implantação** da Trier.
+O foco aqui é operacional: receber o token, criar o serviço, instalar a IA e homologar.
+
+<Callout type="info" title="Ponto de partida">
+  O processo da Trier começa pela solicitação da integração diretamente junto à própria Trier.
+  Sem o token enviado por eles, a implantação não deve avançar.
+</Callout>
+
+## Visão geral do processo
+
+1. Orientar o cliente a solicitar a integração junto à Trier.
+2. Aguardar o envio do token de autenticação.
+3. Gerar a API key da OpenAI.
+4. Criar o serviço em **Serviços > IA Trier API**.
+5. Instalar a IA no módulo de IAs.
+6. Verificar se a fila possui a API key correta.
+7. Homologar antes de liberar em produção.
+
+## Passo 1: Solicitação junto à Trier
+
+Assim que o cliente contratar a IA ou a integração da Trier, oriente-o a entrar em contato com a
+própria Trier para solicitar a integração com a Unico Contato.
+
+Depois disso, a Trier pode:
+
+- entrar em contato diretamente com a equipe
+- ou repassar as credenciais por meio do próprio cliente
+
+Sem esse retorno, não avance para a criação do serviço.
+
+## Passo 2: Receber o token de integração
+
+Com a solicitação feita, aguarde o token que será usado para autenticar a integração.
+
+<ParamsTable params={serviceAccessParams} />
+
+<Callout type="warning" title="Ponto de atenção">
+  Sem o token correto da Trier, o serviço não deve ser criado e a instalação da IA não deve prosseguir.
+</Callout>
+
+## Passo 3: Gerar a API key da OpenAI
+
+Antes de criar o serviço **IA Trier API**, gere e salve a chave da OpenAI que será usada no ambiente
+operacional da IA.
+
+1. Acesse o site da OpenAI em `https://platform.openai.com/`.
+2. Faça login ou crie uma conta usando Google, Microsoft ou e-mail e senha.
+3. Depois de logado, acesse `https://platform.openai.com/api-keys` ou clique no perfil e depois em `View API keys`.
+4. Clique em `Create new secret key` e dê um nome para a chave.
+5. Copie o token gerado, no formato `sk-...`, e salve em local seguro.
+
+<Callout type="warning" title="Importante">
+  Essa chave aparece apenas uma vez. Salve a `OPENAI_API_KEY` em local seguro, como no arquivo
+  `.env`, antes de continuar para a criação do serviço.
+</Callout>
+
+Exemplo no `.env`:
+
+<CodeBlock language="dotenv">{`OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxx`}</CodeBlock>
+
+Exemplo no Node.js:
+
+<CodeBlock language="javascript">{`import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});`}</CodeBlock>
+
+## Passo 4: Criar o serviço IA Trier API
+
+Com o token em mãos, acesse a aba de **Serviços**, abra o módulo **IA Trier API** e informe o token
+recebido da Trier.
+
+Antes de salvar a instância do serviço, preencha também o campo **OpenAI API Key** com a chave
+gerada no passo anterior.
+
+Depois da criação, esse serviço passa a concentrar a operação da integração. Nele você consegue:
+
+- visualizar status
+- visualizar logs
+- reiniciar o serviço
+- parar o serviço
+- pesquisar instâncias
+- acompanhar o status operacional
+- criar nova instância
+
+Na criação da instância do serviço, preencha os dados básicos da loja e de segurança
+conforme o ambiente do cliente.
+
+## Passo 5: Instalar a IA Trier
+
+Depois de criar a API, vá para a **sexta opção do menu lateral**, na área de **IAs**,
+e abra o card da **IA Trier**.
+
+Preencha os campos da instalação:
+
+<ParamsTable params={installParams} />
+
+Esses dados são os que autorizam e concluem a criação da IA na instância do cliente.
+
+## Passo 6: Verificar a API key da fila
+
+Antes de vincular a IA a uma fila de atendimento, confira se a fila tem uma API key definida.
+
+Essa API key precisa estar alinhada com a API key global informada na instalação.
+Se a fila estiver sem essa chave, a integração não vai funcionar.
+
+<Callout type="warning" title="Validação obrigatória">
+  Se a fila não tiver API key, ou se a chave estiver diferente da API key global usada na instalação,
+  a IA não vai funcionar corretamente no atendimento.
+</Callout>
+
+## Passo 7: Homologação inicial
+
+Após a instalação:
+
+- configure a URAB inicialmente para transferir apenas para a loja e para você
+- rode a validação e homologação junto com o cliente
+- confirme se a IA está respondendo bem
+- só depois direcione definitivamente para o cliente
+
+Essa etapa é obrigatória antes de liberar o fluxo em produção.
+
+## Ver também
+
+- <Link to="/main/docs/ias">Visão geral das IAs</Link>
+- <Link to="/main/docs/getting-started/autenticacao">Autenticação</Link>
+- <Link to="/main/docs/erros">Tabela de erros</Link>

@@ -1,0 +1,217 @@
+import { Link } from 'react-router-dom'
+import {
+  ParamsTable,
+  Callout,
+  CodeBlock,
+} from '../../components/DocsComponents'
+
+export const serviceAccessParams = [
+  {
+    field: 'vtex_app_key_variable',
+    type: 'string',
+    required: true,
+    description: 'App Key gerada no Admin VTEX para autenticar as chamadas da integracao.',
+  },
+  {
+    field: 'vtex_app_token_variable',
+    type: 'string',
+    required: true,
+    description: 'App Token vinculado a App Key gerada no Admin VTEX.',
+  },
+]
+
+export const installParams = [
+  { field: 'name', type: 'string', required: true, description: 'Nome final da IA na instancia.' },
+  { field: 'instance', type: 'string', required: true, description: 'URL da instancia onde a IA sera instalada.' },
+  { field: 'nomeCliente', type: 'string', required: true, description: 'Nome da farmacia ou da loja.' },
+  { field: 'url_vtex_variable', type: 'string', required: true, description: 'Pode ser informado como endpoint puro (`natusfarma`), domínio VTEX (`natusfarma.vtexcommercestable.com.br`) ou URL pública do e-commerce (`https://www.natusfarma.com.br`). O sistema normaliza automaticamente para `https://{endpoint}.vtexcommercestable.com.br`.' },
+  { field: 'vtex_app_key_variable', type: 'string', required: true, description: 'App Key da integracao VTEX.' },
+  { field: 'vtex_app_token_variable', type: 'string', required: true, description: 'App Token da integracao VTEX.' },
+  { field: 'apiKey', type: 'string', required: true, description: 'API key global do sistema usada na instalacao.' },
+  { field: 'quantidade_de_produtos', type: 'number', required: true, description: 'Quantidade maxima de produtos retornados na vitrine principal da IA.' },
+  { field: 'code', type: 'string', required: true, description: 'Codigo 2FA para autorizar a criacao da IA.' },
+]
+
+# IA VTEX
+
+Esta pagina deve ser lida como **procedimento inicial de implantacao** da VTEX.
+O foco aqui e operacional: definir as credenciais, criar o servico, instalar a IA e homologar.
+
+<Callout type="info" title="Estado atual">
+  A primeira versao da IA VTEX foi cadastrada no sistema reaproveitando a base estrutural da IA Trier.
+  Isso acelera a entrada do novo provider no painel, mas os templates e o servico/API ainda precisam ser
+  refinados para refletir os endpoints, payloads e regras finais da VTEX.
+</Callout>
+
+## Visao geral do processo
+
+1. Levantar com o cliente as credenciais e as regras da operacao VTEX.
+2. Definir ou ajustar o servico intermediario que fara a ponte com a VTEX.
+3. Gerar a API key da OpenAI.
+4. Criar o servico em **Servicos > IA VTEX API**.
+5. Instalar a IA no modulo de IAs.
+6. Verificar se a fila possui a API key correta.
+7. Homologar antes de liberar em producao.
+
+## Passo 1: Levantamento da integracao VTEX
+
+Antes da instalacao, confirme com o cliente quais credenciais, endpoints e regras comerciais da VTEX
+serao usados no servico intermediario da IA.
+
+Esse levantamento deve cobrir pelo menos:
+
+- endpoint da conta VTEX
+- App Key e App Token da conta VTEX
+- regras de catalogo, preco e disponibilidade
+- comportamento esperado da busca de produtos
+
+Sem essas definicoes, nao avance para producao.
+
+## Passo 2: Gerar App Key e App Token no Admin VTEX
+
+Para essa integracao, as credenciais corretas sao a **App Key** e o **App Token** gerados no
+Admin VTEX do cliente.
+
+Siga este caminho no Admin VTEX:
+
+1. Clique no avatar do usuario no topo do Admin.
+2. Acesse **Account Settings > API Keys**.
+3. Confirme que voce esta na aba de chaves **Generated**.
+4. Clique em **Generate key**.
+5. Preencha o nome/identificacao da chave.
+6. Selecione apenas os papeis necessarios para a integracao.
+7. Clique em **Generate**.
+
+Depois da criacao:
+
+1. A VTEX exibe um link unico para acesso ao token.
+2. Copie esse link e abra o endereco oficial no formato `share.vtex.com/credentials/{token}`.
+3. Nesse link, copie o **App Token** e salve em local seguro.
+4. A **App Key** fica associada a chave criada na pagina de **API Keys**.
+
+<Callout type="warning" title="Importante">
+  O link de compartilhamento do token aparece uma unica vez e tem validade limitada. O token tambem
+  so deve ser exibido uma vez nesse fluxo. Guarde o App Token no momento da criacao.
+</Callout>
+
+<Callout type="warning" title="Seguranca">
+  Use essas credenciais apenas no backend ou no servico intermediario da integracao. Nao exponha
+  App Key e App Token em codigo client-side ou no frontend da loja.
+</Callout>
+
+<ParamsTable params={serviceAccessParams} />
+
+## Passo 3: Validar a credencial de integracao
+
+Com os dados levantados, valide a credencial que sera usada pelo servico intermediario.
+
+Validacoes minimas:
+
+- confirmar o endpoint correto da conta VTEX
+- confirmar que a App Key foi gerada na conta correta
+- confirmar que o App Token foi copiado e salvo no momento da criacao
+- confirmar que os papeis/permissoes associados a chave cobrem a integracao
+- confirmar a URL base correta da conta VTEX
+
+<Callout type="warning" title="Ponto de atencao">
+  Sem a App Key e o App Token corretos da VTEX, o servico nao deve ser criado e a instalacao da IA nao deve prosseguir.
+</Callout>
+
+## Passo 4: Gerar a API key da OpenAI
+
+Antes de criar o servico **IA VTEX API**, gere e salve a chave da OpenAI que sera usada no ambiente
+operacional da IA.
+
+1. Acesse o site da OpenAI em `https://platform.openai.com/`.
+2. Faca login ou crie uma conta usando Google, Microsoft ou e-mail e senha.
+3. Depois de logado, acesse `https://platform.openai.com/api-keys` ou clique no perfil e depois em `View API keys`.
+4. Clique em `Create new secret key` e de um nome para a chave.
+5. Copie o token gerado, no formato `sk-...`, e salve em local seguro.
+
+<Callout type="warning" title="Importante">
+  Essa chave aparece apenas uma vez. Salve a `OPENAI_API_KEY` em local seguro, como no arquivo
+  `.env`, antes de continuar para a criacao do servico.
+</Callout>
+
+Exemplo no `.env`:
+
+<CodeBlock language="dotenv">{`OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxx`}</CodeBlock>
+
+Exemplo no Node.js:
+
+<CodeBlock language="javascript">{`import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});`}</CodeBlock>
+
+## Passo 5: Criar o servico IA VTEX API
+
+Com as credenciais em maos, acesse a aba de **Servicos**, abra o modulo **IA VTEX API** e informe os
+dados operacionais definidos para o cliente.
+
+Antes de salvar a instancia do servico, preencha tambem o campo **OpenAI API Key** com a chave
+gerada no passo anterior.
+
+Depois da criacao, esse servico deve concentrar a operacao da integracao. Nele voce deve conseguir:
+
+- visualizar status
+- visualizar logs
+- reiniciar o servico
+- parar o servico
+- pesquisar instancias
+- acompanhar o status operacional
+- criar nova instancia
+
+## Passo 6: Instalar a IA VTEX
+
+Depois de criar a API, va para a area de **IAs** e abra o card da **IA VTEX**.
+
+Preencha os campos da instalacao:
+
+<ParamsTable params={installParams} />
+
+No preenchimento da instalacao:
+
+- `url_vtex_variable`: pode ser informado como `natusfarma`, `natusfarma.vtexcommercestable.com.br` ou `https://www.natusfarma.com.br`
+- `vtex_app_key_variable`: App Key gerada em **Account Settings > API Keys**
+- `vtex_app_token_variable`: App Token copiado pelo link unico de compartilhamento
+
+O backend completa automaticamente esse valor no formato:
+
+<CodeBlock language="text">{`https://{endpoint}.vtexcommercestable.com.br`}</CodeBlock>
+
+<Callout type="warning" title="Importante nesta primeira versao">
+  A implementacao atual da IA VTEX foi criada a partir da base da Trier para acelerar o cadastro do novo
+  provider no sistema. Antes de uso real, ainda e necessario revisar os templates de busca, imagens, URA
+  e o servico/API para refletir os endpoints e o payload definitivos da VTEX.
+</Callout>
+
+## Passo 7: Verificar a API key da fila
+
+Antes de vincular a IA a uma fila de atendimento, confira se a fila tem uma API key definida.
+
+Essa API key precisa estar alinhada com a API key global informada na instalacao.
+Se a fila estiver sem essa chave, a integracao nao vai funcionar.
+
+<Callout type="warning" title="Validacao obrigatoria">
+  Se a fila nao tiver API key, ou se a chave estiver diferente da API key global usada na instalacao,
+  a IA nao vai funcionar corretamente no atendimento.
+</Callout>
+
+## Passo 8: Homologacao inicial
+
+Apos a instalacao:
+
+- configure a URAB inicialmente para transferir apenas para a loja e para voce
+- rode a validacao e homologacao junto com o cliente
+- confirme se a IA esta respondendo bem
+- so depois direcione definitivamente para o cliente
+
+Essa etapa e obrigatoria antes de liberar o fluxo em producao.
+
+## Ver tambem
+
+- <Link to="/main/docs/ias">Visao geral das IAs</Link>
+- <Link to="/main/docs/getting-started/autenticacao">Autenticacao</Link>
+- <Link to="/main/docs/erros">Tabela de erros</Link>
