@@ -5,7 +5,12 @@ import { deploymentService } from "../deployments/deployment.service";
 import { implantationAccessWhere, type AuthenticatedUser } from "../../lib/access-control";
 import { AUDIT_ACTIONS } from "../audit-logs/audit-log.constants";
 import { auditLogService } from "../audit-logs/audit-log.service";
-import { duplicateUsernames, invalidUsernames } from "../onboarding/onboarding.schema";
+import {
+  duplicateUsernames,
+  invalidUsernames,
+  tooLongUsernames,
+  USERNAME_MAX_LENGTH,
+} from "../onboarding/onboarding.schema";
 
 type Actor = AuthenticatedUser & { name: string };
 
@@ -13,6 +18,10 @@ function assertUniqueUsernames(responses: unknown) {
   const invalid = invalidUsernames(responses);
   if (invalid.length > 0) {
     throw new ConflictError(`O login \"${invalid[0]}\" deve estar em letras minúsculas e não pode ter espaços.`);
+  }
+  const tooLong = tooLongUsernames(responses);
+  if (tooLong.length > 0) {
+    throw new ConflictError(`O login \"${tooLong[0]}\" excede o limite de ${USERNAME_MAX_LENGTH} caracteres.`);
   }
   const duplicates = duplicateUsernames(responses);
   if (duplicates.length > 0) {

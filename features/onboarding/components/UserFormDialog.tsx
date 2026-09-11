@@ -9,7 +9,7 @@ import { createId } from "../initial-data";
 import { Field, Input } from "./FormField";
 import { Reveal } from "./Reveal";
 import { RoleIcon } from "./RoleIcon";
-import { hasDuplicateUsername, normalizeUsername } from "../usernames";
+import { hasDuplicateUsername, normalizeUsername, USERNAME_MAX_LENGTH } from "../usernames";
 
 const ROLE_ORDER: UserRole[] = ["atendente", "supervisor", "administrador"];
 
@@ -119,12 +119,17 @@ export function UserFormDialog({
                       value={draft.username}
                       onChange={(e) => update({ username: normalizeUsername(e.target.value) })}
                       placeholder="usuario.login"
+                      maxLength={USERNAME_MAX_LENGTH}
                       aria-invalid={usernameAlreadyInUse}
                       className={usernameAlreadyInUse ? "border-destructive focus:border-destructive" : undefined}
                     />
                     {usernameAlreadyInUse ? (
                       <span className="text-xs text-destructive">Este login já foi adicionado para outro usuário.</span>
-                    ) : null}
+                    ) : (
+                      <span className="text-xs text-brand/40">
+                        {draft.username.length}/{USERNAME_MAX_LENGTH} caracteres
+                      </span>
+                    )}
                   </div>
                 </Field>
               </div>
