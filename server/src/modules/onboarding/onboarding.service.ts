@@ -1,7 +1,13 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "../../lib/prisma";
 import { ConflictError, NotFoundError } from "../../lib/errors";
-import { duplicateUsernames, invalidUsernames, type SaveOnboardingInput } from "./onboarding.schema";
+import {
+  duplicateUsernames,
+  invalidUsernames,
+  tooLongUsernames,
+  USERNAME_MAX_LENGTH,
+  type SaveOnboardingInput,
+} from "./onboarding.schema";
 
 const EDITABLE_STATUSES = ["ONBOARDING_PENDING", "ONBOARDING_IN_PROGRESS"];
 export const ONBOARDING_TOKEN_TTL_DAYS = 14;
@@ -59,6 +65,10 @@ function assertUniqueUsernames(responses: unknown) {
   const invalid = invalidUsernames(responses);
   if (invalid.length > 0) {
     throw new ConflictError(`O login \"${invalid[0]}\" deve estar em letras minúsculas e não pode ter espaços.`);
+  }
+  const tooLong = tooLongUsernames(responses);
+  if (tooLong.length > 0) {
+    throw new ConflictError(`O login \"${tooLong[0]}\" excede o limite de ${USERNAME_MAX_LENGTH} caracteres.`);
   }
   const duplicates = duplicateUsernames(responses);
   if (duplicates.length > 0) {

@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+export const USERNAME_MAX_LENGTH = 32;
+
 export const saveOnboardingSchema = z.object({
   currentStep: z.string().optional(),
   responses: z.record(z.string(), z.unknown()),
@@ -26,6 +28,11 @@ export function invalidUsernames(responses: unknown): string[] {
   return onboardingUsernames(responses).filter(
     (username) => username !== username.replace(/\s/g, "").toLowerCase(),
   );
+}
+
+/** Um login do Atender Bem não pode ter mais de USERNAME_MAX_LENGTH caracteres. */
+export function tooLongUsernames(responses: unknown): string[] {
+  return onboardingUsernames(responses).filter((username) => username.length > USERNAME_MAX_LENGTH);
 }
 
 /** Retorna logins repetidos, ignorando maiúsculas/minúsculas e espaços. */

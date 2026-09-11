@@ -1,8 +1,11 @@
 import type { UserDraft } from "./types";
 
+/** Mesmo limite de USERNAME_MAX_LENGTH em server/src/modules/onboarding/onboarding.schema.ts. */
+export const USERNAME_MAX_LENGTH = 32;
+
 /** O Atender Bem trata o login sem considerar capitalização. */
 export function normalizeUsername(username: string): string {
-  return username.replace(/\s/g, "").toLowerCase();
+  return username.replace(/\s/g, "").toLowerCase().slice(0, USERNAME_MAX_LENGTH);
 }
 
 export function hasDuplicateUsername(
