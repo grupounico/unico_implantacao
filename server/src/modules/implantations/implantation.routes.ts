@@ -16,6 +16,7 @@ implantationRoutes.post(
   asyncHandler(implantationController.cancel),
 );
 implantationRoutes.post("/:id/onboarding-token/rotate", asyncHandler(implantationController.rotateOnboardingToken));
+implantationRoutes.post("/:id/onboarding/reopen", asyncHandler(implantationController.reopenOnboarding));
 implantationRoutes.get("/:id/activity", asyncHandler(implantationController.activity));
 implantationRoutes.get("/:id/contact-import", asyncHandler(implantationController.contactImport));
 implantationRoutes.get("/:id/contact-import/download", asyncHandler(implantationController.downloadContactImport));

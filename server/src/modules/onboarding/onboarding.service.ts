@@ -1,8 +1,12 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "../../lib/prisma";
+import { auditLogService } from "../audit-logs/audit-log.service";
+import { AUDIT_ACTIONS } from "../audit-logs/audit-log.constants";
+import type { AuthenticatedUser } from "../../lib/access-control";
 import { ConflictError, NotFoundError } from "../../lib/errors";
 import {
   duplicateUsernames,
+  hasInvalidQuickReplies,
   invalidUsernames,
   tooLongUsernames,
   USERNAME_MAX_LENGTH,
@@ -10,7 +14,12 @@ import {
 } from "./onboarding.schema";
 
 const EDITABLE_STATUSES = ["ONBOARDING_PENDING", "ONBOARDING_IN_PROGRESS"];
+const REOPENABLE_STATUSES = ["WAITING_REVIEW", "COMPLETED", "FAILED", "PARTIALLY_FAILED"];
 export const ONBOARDING_TOKEN_TTL_DAYS = 14;
+
+export function canReopenOnboarding(status: string) {
+  return REOPENABLE_STATUSES.includes(status);
+}
 
 export function onboardingTokenExpiresAt() {
   const expiresAt = new Date();
@@ -55,6 +64,60 @@ async function rotateToken(implantationId: string) {
   });
 }
 
+/** Cria uma revisão de uma implantação concluída ou em análise, sempre com novo token público. */
+async function reopen(implantationId: string, actor: AuthenticatedUser & { name: string }) {
+  const implantation = await prisma.implantation.findUnique({
+    where: { id: implantationId },
+    include: { onboarding: true },
+  });
+  if (!implantation) throw new NotFoundError("Implantação não encontrada");
+  if (!canReopenOnboarding(implantation.status)) {
+    throw new ConflictError("A implantação só pode ser revisada após a execução terminar ou enquanto aguarda revisão");
+  }
+
+  const latestSnapshot = await prisma.deploymentSnapshot.findFirst({
+    where: { implantationId },
+    orderBy: { version: "desc" },
+  });
+  const responses =
+    latestSnapshot?.payload ??
+    implantation.onboarding?.reviewedResponses ??
+    implantation.onboarding?.responses ??
+    {};
+
+  const updated = await prisma.$transaction(async (tx) => {
+    await tx.onboarding.upsert({
+      where: { implantationId },
+      create: { implantationId, responses: responses as Prisma.InputJsonValue },
+      update: {
+        responses: responses as Prisma.InputJsonValue,
+        reviewedResponses: Prisma.DbNull,
+        submittedAt: null,
+        currentStep: "welcome",
+      },
+    });
+    return tx.implantation.update({
+      where: { id: implantationId },
+      data: {
+        status: "ONBOARDING_IN_PROGRESS",
+        onboardingToken: crypto.randomUUID(),
+        onboardingTokenExpiresAt: onboardingTokenExpiresAt(),
+        onboardingTokenRevokedAt: null,
+      },
+      select: { onboardingToken: true, onboardingTokenExpiresAt: true },
+    });
+  });
+
+  await auditLogService.record({
+    actor,
+    action: AUDIT_ACTIONS.IMPLANTATION_ONBOARDING_REOPENED,
+    entityType: "Implantation",
+    entityId: implantationId,
+    metadata: { previousStatus: implantation.status, snapshotVersion: latestSnapshot?.version ?? null },
+  });
+  return updated;
+}
+
 function assertEditable(status: string) {
   if (!EDITABLE_STATUSES.includes(status)) {
     throw new ConflictError("Este onboarding já foi enviado e não pode mais ser editado");
@@ -62,6 +125,9 @@ function assertEditable(status: string) {
 }
 
 function assertUniqueUsernames(responses: unknown) {
+  if (hasInvalidQuickReplies(responses)) {
+    throw new ConflictError("Toda resposta rápida ativa precisa ter título e texto.");
+  }
   const invalid = invalidUsernames(responses);
   if (invalid.length > 0) {
     throw new ConflictError(`O login \"${invalid[0]}\" deve estar em letras minúsculas e não pode ter espaços.`);
@@ -163,4 +229,4 @@ async function submit(token: string) {
   return onboarding;
 }
 
-export const onboardingService = { getByToken, saveProgress, submit, rotateToken };
+export const onboardingService = { getByToken, saveProgress, submit, rotateToken, reopen };

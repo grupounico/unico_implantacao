@@ -82,6 +82,11 @@ const payloadSchema = z.object({
     .default({ users: [], usesCustomDefaultPassword: false, defaultPassword: "" }),
 });
 
+/** O Atender Bem exige cinco caracteres no nome, mas o painel preserva a escrita do cliente. */
+function externalFullName(name: string) {
+  return name.length < 5 ? name.padEnd(5, " ") : name;
+}
+
 export const createUsersProcessor: Processor = async ({ client, snapshotPayload }) => {
   const { team } = payloadSchema.parse(snapshotPayload);
 
@@ -124,7 +129,7 @@ export const createUsersProcessor: Processor = async ({ client, snapshotPayload 
       // Não mexe na senha nem no ramal — reprocessar não deve trocar um
       // ramal que já foi gerado/atribuído.
       await users.updateUser(client, found.id, {
-        fullname: user.name,
+        fullname: externalFullName(user.name),
         type,
         ...OPERATIONAL_USER_DEFAULTS,
       });
@@ -140,7 +145,7 @@ export const createUsersProcessor: Processor = async ({ client, snapshotPayload 
 
     const created = await users.createUser(client, {
       username: user.username,
-      fullname: user.name,
+      fullname: externalFullName(user.name),
       password,
       type,
       ...(extension ? { sipuser: extension } : {}),

@@ -47,6 +47,11 @@ async function rotateOnboardingToken(req: Request, res: Response) {
   return res.json(token);
 }
 
+async function reopenOnboarding(req: Request, res: Response) {
+  await implantationService.getById(req.params.id, req.user!);
+  return res.json(await onboardingService.reopen(req.params.id, req.user!));
+}
+
 async function activity(req: Request, res: Response) {
   const events = await implantationService.activity(req.params.id, req.user!);
   return res.json(events);
@@ -72,6 +77,7 @@ export const implantationController = {
   update,
   cancel,
   rotateOnboardingToken,
+  reopenOnboarding,
   activity,
   contactImport,
   downloadContactImport,

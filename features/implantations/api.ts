@@ -193,6 +193,17 @@ export async function approveImplantation(id: string): Promise<void> {
   }
 }
 
+export async function reopenOnboarding(id: string): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/implantations/${id}/onboarding/reopen`, {
+    method: "POST",
+    credentials: "include",
+  });
+  if (!response.ok) {
+    const body = await response.json().catch(() => null);
+    throw new Error(body?.message ?? "Não foi possível reabrir o onboarding");
+  }
+}
+
 export async function fetchDeploymentRun(
   implantationId: string,
   headers?: HeadersInit,

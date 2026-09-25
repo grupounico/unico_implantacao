@@ -7,6 +7,10 @@ import { ConfirmPopover } from "../components/ConfirmPopover";
 import { createId } from "../initial-data";
 import type { OnboardingData, QuickReplyDraft } from "../types";
 
+export function hasIncompleteQuickReplies(replies: QuickReplyDraft[]) {
+  return replies.some((reply) => reply.selected && (!reply.shortcut.trim() || !reply.message.trim()));
+}
+
 export function QuickRepliesStep({
   data,
   onChange,
@@ -98,7 +102,11 @@ export function QuickRepliesStep({
               transition={{ duration: 0.2, ease: "easeOut" }}
               className="overflow-hidden"
             >
-              <div className="rounded-2xl border border-border-soft bg-card p-4 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+              <div className={`rounded-2xl border bg-card p-4 shadow-[0_1px_2px_rgba(15,23,42,0.04)] ${
+                reply.selected && (!reply.shortcut.trim() || !reply.message.trim())
+                  ? "border-destructive"
+                  : "border-border-soft"
+              }`}>
                 <div className={`transition-opacity ${reply.selected ? "" : "opacity-45"}`}>
                   <div className="flex items-baseline gap-1">
                     <span className="shrink-0 text-sm font-semibold text-brand/30">!</span>
@@ -116,6 +124,9 @@ export function QuickRepliesStep({
                     rows={reply.message.length > 200 ? 6 : 2}
                     className="mt-2 w-full resize-none rounded-lg border-0 bg-brand-light/60 px-3 py-2.5 text-sm leading-relaxed text-brand outline-none transition-colors placeholder:text-brand/35 focus:bg-brand-light"
                   />
+                  {reply.selected && (!reply.shortcut.trim() || !reply.message.trim()) ? (
+                    <p className="mt-2 text-xs text-destructive">Preencha o título e o texto, ou desative esta resposta.</p>
+                  ) : null}
                 </div>
                 <div className="mt-3 flex items-center justify-between border-t border-border-soft/70 pt-3">
                   <div className="flex items-center gap-2">

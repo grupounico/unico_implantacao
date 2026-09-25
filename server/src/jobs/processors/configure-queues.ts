@@ -83,21 +83,17 @@ function buildDay(dayOfWeek: number, hours: z.infer<typeof dayHoursSchema>): Bus
 }
 
 /**
- * Cria a configuração de horário de atendimento (recurso à parte, ligado à
- * fila só pelo id) — só na primeira vez; se a fila já tem uma
- * (`fk_businesshours_config`), não mexe nela, porque ainda não confirmamos
- * o endpoint de atualização (só o de criação).
+ * Cria uma configuração de horário e a vincula à fila. Para filas existentes
+ * também cria uma substituta: o POST e o PUT da fila são contratos
+ * confirmados, enquanto o endpoint de edição do recurso de horário não é.
+ * Assim, um reprocessamento aplica a agenda e a mensagem sem arriscar uma
+ * rota REST inferida.
  */
 async function ensureBusinessHoursConfig(
   client: Parameters<typeof queues.getQueue>[0],
   queueId: number,
   queue: QueueInput,
-): Promise<number | undefined> {
-  const current = await queues.getQueue(client, queueId);
-  if (current.fk_businesshours_config) {
-    return undefined;
-  }
-
+): Promise<number> {
   const config = await businessHours.createBusinessHoursConfig(client, {
     name: `${queue.name} — Horário de atendimento`,
     message: queue.offHoursMessage,
@@ -179,7 +175,9 @@ function buildQueuePatch(
     sendsurvey: queue.sendSatisfactionSurvey ? 1 : 0,
     surveytext: queue.sendSatisfactionSurvey ? queue.satisfactionSurveyText : "",
     surveythankstext: queue.sendSatisfactionSurvey ? queue.satisfactionThanksMessage : "",
-    ...(queue.offHoursMessage ? { offhourmsg: queue.offHoursMessage } : {}),
+    // Envia inclusive vazio para remover uma mensagem anterior numa
+    // reexecução — omitir o campo preservaria a configuração antiga.
+    offhourmsg: queue.offHoursMessage,
     distributionstrategy: DISTRIBUTION_STRATEGY_MAP[queue.distributionStrategy] ?? 0,
     autoaddcontacts: CONTACT_REGISTRATION_MAP[queue.contactRegistration] ?? 1,
     clienttimeout: inactivitySeconds,

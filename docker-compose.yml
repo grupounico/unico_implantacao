@@ -1,7 +1,6 @@
 services:
   postgres:
     image: postgres:16
-    container_name: unico-implantacao-postgres
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:?Defina POSTGRES_USER no ambiente}
@@ -14,7 +13,6 @@ services:
 
   redis:
     image: redis:7
-    container_name: unico-implantacao-redis
     restart: unless-stopped
     command:
       [

@@ -13,6 +13,7 @@
     "seed:admin": "tsx prisma/seed-admin.ts",
     "test:atender-bem": "tsx src/integrations/atender-bem/__manual-test.ts",
     "test:processors": "tsx src/jobs/processors/__manual-test.ts",
+    "test:onboarding": "tsx src/modules/onboarding/__manual-test.ts",
     "test:server": "npm run test:atender-bem && npm run test:processors && npm run test:processors:assign",
     "test:processors:assign": "tsx src/jobs/processors/__manual-test-assign.ts"
   },

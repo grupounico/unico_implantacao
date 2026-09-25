@@ -79,6 +79,11 @@ export function UserFormDialog({
     update({ queueIds });
   }
 
+  function toggleAllQueues() {
+    if (!draft) return;
+    update({ queueIds: draft.queueIds.length === queues.length ? [] : queues.map((queue) => queue.id) });
+  }
+
   function handleSave() {
     if (!draft || !canSave(draft)) return;
     onSave(draft);
@@ -178,24 +183,33 @@ export function UserFormDialog({
                 <div className="flex flex-col gap-1.5">
                   <span className="text-sm text-brand/40">Filas de acesso</span>
                   {queues.length > 0 ? (
-                    <div className="flex flex-wrap gap-1.5">
-                      {queues.map((queue) => {
-                        const active = draft.queueIds.includes(queue.id);
-                        return (
-                          <button
-                            key={queue.id}
-                            type="button"
-                            onClick={() => toggleQueue(queue.id)}
-                            className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
-                              active
-                                ? "border-brand bg-brand-light text-brand"
-                                : "border-border-soft text-brand/50 hover:border-brand/40"
-                            }`}
-                          >
-                            {queue.name || "Fila sem nome"}
-                          </button>
-                        );
-                      })}
+                    <div className="flex flex-col gap-2">
+                      <button
+                        type="button"
+                        onClick={toggleAllQueues}
+                        className="w-fit text-xs font-medium text-accent hover:text-accent/80"
+                      >
+                        {draft.queueIds.length === queues.length ? "Limpar seleção" : "Selecionar todas"}
+                      </button>
+                      <div className="flex flex-wrap gap-1.5">
+                        {queues.map((queue) => {
+                          const active = draft.queueIds.includes(queue.id);
+                          return (
+                            <button
+                              key={queue.id}
+                              type="button"
+                              onClick={() => toggleQueue(queue.id)}
+                              className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                                active
+                                  ? "border-brand bg-brand-light text-brand"
+                                  : "border-border-soft text-brand/50 hover:border-brand/40"
+                              }`}
+                            >
+                              {queue.name || "Fila sem nome"}
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
                   ) : (
                     <p className="text-xs text-brand/40">

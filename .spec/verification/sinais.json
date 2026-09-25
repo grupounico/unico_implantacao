@@ -1,0 +1,131 @@
+{
+  "schema": 1,
+  "sinais": {
+    "STATUS_INVALIDO::correcoes-implantador::.spec\\features\\correcoes-implantador\\spec.md": {
+      "codigo": "STATUS_INVALIDO",
+      "feature": "correcoes-implantador",
+      "ref": ".spec\\features\\correcoes-implantador\\spec.md",
+      "ocorrencias": 1,
+      "primeiraVez": "2026-09-21T16:56:48.938Z",
+      "ultimaVez": "2026-09-21T16:56:48.940Z",
+      "gitRev": "e0db41e"
+    },
+    "AC_SEM_TESTE::correcoes-implantador::AC-001": {
+      "codigo": "AC_SEM_TESTE",
+      "feature": "correcoes-implantador",
+      "ref": "AC-001",
+      "ocorrencias": 1,
+      "primeiraVez": "2026-09-21T16:56:48.941Z",
+      "ultimaVez": "2026-09-21T16:56:48.941Z",
+      "gitRev": "e0db41e"
+    },
+    "AC_SEM_TESTE::correcoes-implantador::AC-002": {
+      "codigo": "AC_SEM_TESTE",
+      "feature": "correcoes-implantador",
+      "ref": "AC-002",
+      "ocorrencias": 1,
+      "primeiraVez": "2026-09-21T16:56:48.941Z",
+      "ultimaVez": "2026-09-21T16:56:48.941Z",
+      "gitRev": "e0db41e"
+    },
+    "AC_SEM_TESTE::correcoes-implantador::AC-003": {
+      "codigo": "AC_SEM_TESTE",
+      "feature": "correcoes-implantador",
+      "ref": "AC-003",
+      "ocorrencias": 1,
+      "primeiraVez": "2026-09-21T16:56:48.941Z",
+      "ultimaVez": "2026-09-21T16:56:48.941Z",
+      "gitRev": "e0db41e"
+    },
+    "AC_SEM_TESTE::correcoes-implantador::AC-004": {
+      "codigo": "AC_SEM_TESTE",
+      "feature": "correcoes-implantador",
+      "ref": "AC-004",
+      "ocorrencias": 1,
+      "primeiraVez": "2026-09-21T16:56:48.941Z",
+      "ultimaVez": "2026-09-21T16:56:48.941Z",
+      "gitRev": "e0db41e"
+    },
+    "AC_SEM_TESTE::correcoes-implantador::AC-005": {
+      "codigo": "AC_SEM_TESTE",
+      "feature": "correcoes-implantador",
+      "ref": "AC-005",
+      "ocorrencias": 1,
+      "primeiraVez": "2026-09-21T16:56:48.941Z",
+      "ultimaVez": "2026-09-21T16:56:48.941Z",
+      "gitRev": "e0db41e"
+    },
+    "AC_SEM_TESTE::correcoes-implantador::AC-006": {
+      "codigo": "AC_SEM_TESTE",
+      "feature": "correcoes-implantador",
+      "ref": "AC-006",
+      "ocorrencias": 1,
+      "primeiraVez": "2026-09-21T16:56:48.941Z",
+      "ultimaVez": "2026-09-21T16:56:48.941Z",
+      "gitRev": "e0db41e"
+    },
+    "AC_SEM_TESTE::correcoes-implantador::AC-007": {
+      "codigo": "AC_SEM_TESTE",
+      "feature": "correcoes-implantador",
+      "ref": "AC-007",
+      "ocorrencias": 1,
+      "primeiraVez": "2026-09-21T16:56:48.941Z",
+      "ultimaVez": "2026-09-21T16:56:48.941Z",
+      "gitRev": "e0db41e"
+    },
+    "AC_SEM_TESTE::correcoes-implantador::AC-008": {
+      "codigo": "AC_SEM_TESTE",
+      "feature": "correcoes-implantador",
+      "ref": "AC-008",
+      "ocorrencias": 1,
+      "primeiraVez": "2026-09-21T16:56:48.941Z",
+      "ultimaVez": "2026-09-21T16:56:48.941Z",
+      "gitRev": "e0db41e"
+    },
+    "AC_SEM_TESTE::correcoes-implantador::AC-009": {
+      "codigo": "AC_SEM_TESTE",
+      "feature": "correcoes-implantador",
+      "ref": "AC-009",
+      "ocorrencias": 1,
+      "primeiraVez": "2026-09-21T16:56:48.941Z",
+      "ultimaVez": "2026-09-21T16:56:48.941Z",
+      "gitRev": "e0db41e"
+    },
+    "AC_SEM_TESTE::correcoes-implantador::AC-010": {
+      "codigo": "AC_SEM_TESTE",
+      "feature": "correcoes-implantador",
+      "ref": "AC-010",
+      "ocorrencias": 1,
+      "primeiraVez": "2026-09-21T16:56:48.941Z",
+      "ultimaVez": "2026-09-21T16:56:48.941Z",
+      "gitRev": "e0db41e"
+    },
+    "AC_SEM_TESTE::correcoes-implantador::AC-011": {
+      "codigo": "AC_SEM_TESTE",
+      "feature": "correcoes-implantador",
+      "ref": "AC-011",
+      "ocorrencias": 1,
+      "primeiraVez": "2026-09-21T16:56:48.941Z",
+      "ultimaVez": "2026-09-21T16:56:48.941Z",
+      "gitRev": "e0db41e"
+    },
+    "AC_SEM_TESTE::correcoes-implantador::AC-012": {
+      "codigo": "AC_SEM_TESTE",
+      "feature": "correcoes-implantador",
+      "ref": "AC-012",
+      "ocorrencias": 1,
+      "primeiraVez": "2026-09-21T16:56:48.941Z",
+      "ultimaVez": "2026-09-21T16:56:48.941Z",
+      "gitRev": "e0db41e"
+    },
+    "GLOB_SEM_ARQUIVOS::—::P-002": {
+      "codigo": "GLOB_SEM_ARQUIVOS",
+      "feature": "—",
+      "ref": "P-002",
+      "ocorrencias": 1,
+      "primeiraVez": "2026-09-21T16:56:48.941Z",
+      "ultimaVez": "2026-09-21T16:56:48.941Z",
+      "gitRev": "e0db41e"
+    }
+  }
+}

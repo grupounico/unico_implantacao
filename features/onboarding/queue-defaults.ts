@@ -44,7 +44,7 @@ export function createDefaultQueue(
     contactRegistration: "automatic",
     transferPolicy: "any",
     transferableQueueIds: [],
-    requiresClosingReason: false,
+    requiresClosingReason: true,
     closingReasons: createDefaultClosingReasons(),
     closesByInactivity: false,
     inactivityTimeout: "30m",

@@ -8,6 +8,7 @@ export const AUDIT_ACTION_LABELS: Record<string, string> = {
   IMPLANTATION_CREATED: "Implantação criada",
   IMPLANTATION_UPDATED: "Dados da implantação atualizados",
   IMPLANTATION_REVIEW_UPDATED: "Revisão do onboarding editada",
+  IMPLANTATION_ONBOARDING_REOPENED: "Nova revisão de onboarding criada",
   IMPLANTATION_APPROVED: "Revisão aprovada — implantação iniciada",
   IMPLANTATION_CANCELLED: "Implantação cancelada",
   IMPLANTATION_IMPLANTER_ASSIGNED: "Implantador atribuído",

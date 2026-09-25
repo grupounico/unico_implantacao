@@ -1,0 +1,196 @@
+{
+  "runId": "unicoImplantacao-correcoes-implantador-mubhmgdj",
+  "feature": "correcoes-implantador",
+  "agent": "codex",
+  "modo": "paralelo",
+  "paralelizar": null,
+  "modeloForcado": null,
+  "esforcoForcado": null,
+  "geradoEm": "2026-09-21 16:56",
+  "branchTrabalho": "spec/correcoes-implantador",
+  "baseDir": ".spec/features/correcoes-implantador",
+  "specDir": ".spec",
+  "repoName": "unicoImplantacao",
+  "logsDir": "../onp-worktrees/unicoImplantacao-correcoes-implantador-logs",
+  "ondas": [
+    [
+      "faixa-1",
+      "faixa-2",
+      "faixa-3"
+    ],
+    [
+      "faixa-4",
+      "faixa-5",
+      "faixa-6"
+    ]
+  ],
+  "faixas": [
+    {
+      "id": "faixa-1",
+      "branch": "spec/correcoes-implantador-faixa-1",
+      "worktree": "../onp-worktrees/unicoImplantacao-correcoes-implantador-faixa-1",
+      "tarefas": [
+        {
+          "id": "T-001",
+          "titulo": "Criar testes de regressão para processadores",
+          "modelo": "gpt-5.6-terra",
+          "esforco": "medium",
+          "arquivos": [
+            "server/src/jobs/processors/__manual-test.ts",
+            "server/package.json"
+          ],
+          "refs": [
+            "AC-001",
+            "AC-002",
+            "AC-003",
+            "AC-005",
+            "AC-009",
+            "AC-012"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "faixa-2",
+      "branch": "spec/correcoes-implantador-faixa-2",
+      "worktree": "../onp-worktrees/unicoImplantacao-correcoes-implantador-faixa-2",
+      "tarefas": [
+        {
+          "id": "T-002",
+          "titulo": "Corrigir defaults e contrato de filas",
+          "modelo": "gpt-5.6-terra",
+          "esforco": "medium",
+          "arquivos": [
+            "features/onboarding/queue-defaults.ts",
+            "features/onboarding/types.ts",
+            "features/onboarding/components/QueueFormDialog.tsx",
+            "server/src/jobs/processors/configure-queues.ts",
+            "server/src/integrations/atender-bem/business-hours.ts"
+          ],
+          "refs": [
+            "AC-001",
+            "AC-002",
+            "AC-003",
+            "AC-004"
+          ]
+        },
+        {
+          "id": "T-007",
+          "titulo": "Refinar descoberta das opções de fila",
+          "modelo": "gpt-5.6-terra",
+          "esforco": "medium",
+          "arquivos": [
+            "features/onboarding/components/QueueFormDialog.tsx"
+          ],
+          "refs": [
+            "AC-011"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "faixa-3",
+      "branch": "spec/correcoes-implantador-faixa-3",
+      "worktree": "../onp-worktrees/unicoImplantacao-correcoes-implantador-faixa-3",
+      "tarefas": [
+        {
+          "id": "T-003",
+          "titulo": "Reabrir onboarding com auditoria",
+          "modelo": "gpt-5.6-terra",
+          "esforco": "medium",
+          "arquivos": [
+            "server/src/modules/onboarding/onboarding.service.ts",
+            "server/src/modules/implantations/implantation.controller.ts",
+            "server/src/modules/implantations/implantation.routes.ts",
+            "server/src/modules/audit-logs/audit-log.constants.ts",
+            "features/implantations/api.ts",
+            "features/implantations/components"
+          ],
+          "refs": [
+            "AC-006",
+            "AC-007"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "faixa-4",
+      "branch": "spec/correcoes-implantador-faixa-4",
+      "worktree": "../onp-worktrees/unicoImplantacao-correcoes-implantador-faixa-4",
+      "tarefas": [
+        {
+          "id": "T-004",
+          "titulo": "Reutilizar administrador principal",
+          "modelo": "gpt-5.6-terra",
+          "esforco": "medium",
+          "arquivos": [
+            "server/src/jobs/processors/create-users.ts",
+            "server/src/integrations/atender-bem/users.ts"
+          ],
+          "refs": [
+            "AC-005"
+          ]
+        },
+        {
+          "id": "T-005",
+          "titulo": "Melhorar seleção e nomes de usuários",
+          "modelo": "gpt-5.6-terra",
+          "esforco": "medium",
+          "arquivos": [
+            "features/onboarding/components/UserFormDialog.tsx",
+            "server/src/jobs/processors/create-users.ts"
+          ],
+          "refs": [
+            "AC-008",
+            "AC-009"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "faixa-5",
+      "branch": "spec/correcoes-implantador-faixa-5",
+      "worktree": "../onp-worktrees/unicoImplantacao-correcoes-implantador-faixa-5",
+      "tarefas": [
+        {
+          "id": "T-006",
+          "titulo": "Validar respostas rápidas no onboarding",
+          "modelo": "gpt-5.6-terra",
+          "esforco": "medium",
+          "arquivos": [
+            "features/onboarding/steps/QuickRepliesStep.tsx",
+            "features/onboarding/OnboardingWizard.tsx",
+            "server/src/modules/onboarding/onboarding.schema.ts"
+          ],
+          "refs": [
+            "AC-010"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "faixa-6",
+      "branch": "spec/correcoes-implantador-faixa-6",
+      "worktree": "../onp-worktrees/unicoImplantacao-correcoes-implantador-faixa-6",
+      "tarefas": [
+        {
+          "id": "T-008",
+          "titulo": "Substituir template de URA",
+          "modelo": "gpt-5.6-terra",
+          "esforco": "medium",
+          "arquivos": [
+            "server/src/integrations/atender-bem/defaults/ivr-boas-vindas-basico.json",
+            "server/src/integrations/atender-bem/defaults/index.ts",
+            "server/src/jobs/processors/configure-ivr.ts"
+          ],
+          "refs": [
+            "AC-012"
+          ]
+        }
+      ]
+    }
+  ],
+  "sequenciais": [],
+  "concluidas": [],
+  "avisos": []
+}
