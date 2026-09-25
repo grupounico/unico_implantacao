@@ -14,7 +14,7 @@ import { CompanyDetailsStep } from "./steps/CompanyDetailsStep";
 import { CompanySegmentStep } from "./steps/CompanySegmentStep";
 import { CompletionStep } from "./steps/CompletionStep";
 import { CustomersStep } from "./steps/CustomersStep";
-import { QuickRepliesStep } from "./steps/QuickRepliesStep";
+import { hasIncompleteQuickReplies, QuickRepliesStep } from "./steps/QuickRepliesStep";
 import { ReviewStep } from "./steps/ReviewStep";
 import { ServiceStep } from "./steps/ServiceStep";
 import { TagsStep } from "./steps/TagsStep";
@@ -188,6 +188,7 @@ export function OnboardingWizard({
     companyDetails: !isCompanyDetailsValid,
     service: !isServiceValid,
     team: !isTeamValid,
+    quickReplies: hasIncompleteQuickReplies(data.customization.quickReplies),
   };
 
   const copy = STEP_COPY[step];

@@ -201,6 +201,9 @@ export function QueueFormDialog({
               title={editingQueue ? "Editar fila de atendimento" : "Nova fila de atendimento"}
             />
             <DialogBody className="flex flex-col divide-y divide-border-soft">
+              <p className="rounded-lg bg-brand-light px-3 py-2 text-xs text-brand/60">
+                Configure cada etapa abaixo. Continue até “Pesquisa de satisfação” para ver todas as opções da fila.
+              </p>
               <div className="pb-7">
                 <SectionTitle icon={IdCard}>Identificação do canal</SectionTitle>
                 <div className="grid gap-4 sm:grid-cols-2">

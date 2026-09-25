@@ -38,6 +38,7 @@ let nextContactTagId = 101;
 let nextChatTagId = 1;
 let nextTextId = 1;
 let nextBusinessHoursId = 1;
+let businessHoursConfigsDb: Record<string, unknown>[] = [];
 
 const queueDraftDefaults = {
   id: "queue-draft",
@@ -56,7 +57,9 @@ globalThis.fetch = async (input: string | URL, init?: RequestInit) => {
     return new Response(JSON.stringify({ token: "token-1" }), { status: 200 });
   }
   if (url.pathname === "/businesshours/configs" && method === "POST") {
-    return new Response(JSON.stringify({ id: nextBusinessHoursId++, ...body }), { status: 201 });
+    const created = { id: nextBusinessHoursId++, ...body };
+    businessHoursConfigsDb.push(created);
+    return new Response(JSON.stringify(created), { status: 201 });
   }
   if (url.pathname === "/queues" && method === "GET") {
     return new Response(JSON.stringify(queuesDb), { status: 200 });
@@ -250,7 +253,15 @@ async function main() {
     snapshotPayload: {
       service: {
         queues: [
-          { ...queueDraftDefaults, id: "instagram-rede", name: "Instagram da rede", channel: "instagram" },
+          {
+            ...queueDraftDefaults,
+            id: "instagram-rede",
+            name: "Instagram da rede",
+            channel: "instagram",
+            distributionStrategy: "agent_pull",
+            weekdayHours: { enabled: true, start: "09:00", end: "17:00" },
+            offHoursMessage: "Voltamos no próximo horário útil.",
+          },
         ],
       },
     },
@@ -259,6 +270,22 @@ async function main() {
   check(
     "reprocessar CONFIGURE_QUEUES retorna o id já existente",
     (secondRun.metadata?.queues as { id: number }[])[0].id === 2,
+  );
+  const updatedInstagramQueue = queuesDb.find((queue) => queue.name === "Instagram da rede") as Record<string, unknown>;
+  check(
+    "reprocessar CONFIGURE_QUEUES desativa distribuição automática",
+    updatedInstagramQueue.distributionstrategy === 4,
+  );
+  check(
+    "reprocessar CONFIGURE_QUEUES substitui a configuração de horário existente",
+    updatedInstagramQueue.fk_businesshours_config === 3,
+  );
+  const replacementBusinessHours = businessHoursConfigsDb.find((config) => config.id === 3) as Record<string, unknown>;
+  check(
+    "reprocessar CONFIGURE_QUEUES grava horário e mensagem fora do horário",
+    replacementBusinessHours.message === "Voltamos no próximo horário útil." &&
+      (replacementBusinessHours.weeklySchedules as { day_of_week: number; is_open: number; periods: { open_time: string; close_time: string }[] }[])
+        .some((day) => day.day_of_week === 1 && day.is_open === 1 && day.periods[0]?.open_time === "09:00:00" && day.periods[0]?.close_time === "17:00:00"),
   );
 
   // --- CREATE_USERS ------------------------------------------------------

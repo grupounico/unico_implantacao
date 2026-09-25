@@ -96,6 +96,11 @@ numérico confirmado nos artefatos deste projeto. Não inferir o valor.
 - `maxchatsperagent`, `distributionstrategy`, `preferlastagent` e
   `transferfilters`: distribuição de atendimento.
 - `fk_businesshours_config`, `offhourmsg`: horário de atendimento.
+
+Para reaplicar uma agenda numa fila que já tem `fk_businesshours_config`, o
+provisionador cria uma nova configuração em `POST /businesshours/configs` e a
+associa pela atualização confirmada da fila. Isso evita inferir uma rota de
+edição para `/businesshours/configs/{id}` que ainda não foi capturada.
 - `webconfig`: configuração do widget web; contém também `queueId` e domínio.
 - `apikey`: segredo por fila. Nunca devolver nem persistir em logs.
 - `*hook`: strings JSON de webhooks. Não sobrescrever sem preservar o valor

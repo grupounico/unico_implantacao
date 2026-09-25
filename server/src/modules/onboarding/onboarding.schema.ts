@@ -23,6 +23,26 @@ function onboardingUsernames(responses: unknown): string[] {
   return (parsed.data.team?.users ?? []).map((user) => user.username);
 }
 
+/** Respostas rápidas ativas precisam ter título e texto antes de chegar ao worker. */
+export function hasInvalidQuickReplies(responses: unknown): boolean {
+  const parsed = z
+    .object({
+      customization: z
+        .object({
+          quickReplies: z
+            .array(z.object({ shortcut: z.string(), message: z.string(), selected: z.boolean() }))
+            .default([]),
+        })
+        .optional(),
+    })
+    .passthrough()
+    .safeParse(responses);
+
+  return parsed.success && parsed.data.customization?.quickReplies.some(
+    (reply) => reply.selected && (!reply.shortcut.trim() || !reply.message.trim()),
+  ) === true;
+}
+
 /** Um login do Atender Bem deve estar em minúsculas e não pode conter espaços. */
 export function invalidUsernames(responses: unknown): string[] {
   return onboardingUsernames(responses).filter(

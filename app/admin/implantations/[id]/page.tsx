@@ -20,6 +20,7 @@ import { DeploymentRunPanel } from "@/features/implantations/components/Deployme
 import { ImplanterField } from "@/features/implantations/components/ImplanterField"
 import { OnboardingReview } from "@/features/implantations/components/OnboardingReview"
 import { ReviewEditor } from "@/features/implantations/components/ReviewEditor"
+import { ReopenOnboardingCard } from "@/features/implantations/components/ReopenOnboardingCard"
 import { RunStatusPoller } from "@/features/implantations/components/RunStatusPoller"
 import { StatusBadge } from "@/features/implantations/components/StatusBadge"
 import { mergeOnboardingData } from "@/features/implantations/onboarding-merge"
@@ -50,6 +51,9 @@ export default async function ImplantationDetailPage({
   const rawResponses = (review?.reviewedResponses ?? review?.clientResponses ?? null) as Partial<OnboardingData> | null
   const responses = rawResponses ? mergeOnboardingData(rawResponses) : null
   const isEditable = implantation.status === "WAITING_REVIEW"
+  const canReopen = ["WAITING_REVIEW", "COMPLETED", "FAILED", "PARTIALLY_FAILED"].includes(
+    implantation.status,
+  )
 
   return (
     <>
@@ -172,8 +176,17 @@ export default async function ImplantationDetailPage({
               <TabsContent value="overview" className="flex flex-col gap-4">
                 {run && <DeploymentRunPanel implantationId={implantation.id} run={run} />}
 
+                {canReopen && (
+                  <ReopenOnboardingCard
+                    implantationId={implantation.id}
+                    isExpansion={implantation.status !== "WAITING_REVIEW"}
+                  />
+                )}
+
                 {isEditable && (
-                  <ApproveCard implantationId={implantation.id} approverName={user.name} />
+                  <>
+                    <ApproveCard implantationId={implantation.id} approverName={user.name} />
+                  </>
                 )}
 
                 {responses ? (
